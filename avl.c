@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.1 2013/11/21 23:01:23 luis Exp $
+/* $Id: avl.c,v 1.2 2013/11/21 23:18:30 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Wed Oct  7 17:57:51     2009
  *
@@ -61,7 +61,7 @@ struct avl_node {
 	struct avl_node		*parent;
 	struct avl_node		*left;
 	struct avl_node		*right;
-	char				*key;
+	const void			*key;
 	void				*data;
 };
 
@@ -69,15 +69,18 @@ struct avl_tree {
 	int					sz;
 	struct avl_node		*root;
 	AVL_FCOMP			fcomp;
+	AVL_FCONS			fcons;
+	AVL_FDEST			fdest;
 };
 
 /* prototypes */
 static char *avl_equ2str(avl_equ equ);
 static struct avl_node *new_avl_node(
-	const char *key,
+	const void *key,
 	void *data,
-	struct avl_node *prnt);
-static void free_avl_node(struct avl_node *n);
+	struct avl_node *prnt,
+	AVL_FCONS fc);
+static void free_avl_node(struct avl_node *n, AVL_FDEST fd);
 static struct avl_node *avl_node_root(struct avl_node *n);
 static struct avl_node *avl_node_first(struct avl_node *n);
 static struct avl_node *avl_node_last(struct avl_node *n);
@@ -85,7 +88,7 @@ static struct avl_node *avl_node_prev(struct avl_node *n);
 static struct avl_node *avl_node_next(struct avl_node *n);
 static struct avl_node *avl_node_search(
 	struct avl_node *n,
-	const char *k,
+	const void *k,
 	AVL_FCOMP fc,
 	avl_equ *e);
 static struct avl_node *avl_node_unlink(
@@ -119,7 +122,7 @@ static void avl_node_print(
 	FILE *o);
 
 /* variables */
-static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.1 2013/11/21 23:01:23 luis Exp $\n";
+static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.2 2013/11/21 23:18:30 luis Exp $\n";
 
 /* functions */
 static char *avl_equ2str(avl_equ equ)
@@ -133,9 +136,10 @@ static char *avl_equ2str(avl_equ equ)
 } /* avl_equ2str */
 
 static struct avl_node *new_avl_node(
-	const char *key,
+	const void *key,
 	void *data,
-	struct avl_node *prnt)
+	struct avl_node *prnt,
+	AVL_FCONS fc)
 {
 	struct avl_node *res;
 	assert(res = malloc(sizeof (struct avl_node)));
@@ -144,18 +148,18 @@ static struct avl_node *new_avl_node(
 	res->left = NULL;
 	res->right = NULL;
 	res->equi = AVL_EQU;
-	res->key = strdup(key);
+	res->key = fc ? fc(key) : key;
 	res->data = data;
 	return res;
 } /* new_avl_node */
 
-static void free_avl_node(struct avl_node *n)
+static void free_avl_node(struct avl_node *n, AVL_FDEST fd)
 {
 	if (n) {
-		if (n->left) free_avl_node(n->left);
-		if (n->right) free_avl_node(n->right);
+		if (n->left) free_avl_node(n->left, fd);
+		if (n->right) free_avl_node(n->right, fd);
 		DEB(("free_avl_node: deleting %p\n", n));
-		free(n->key);
+		if (fd) fd(n->key);
 		free(n);
 	} /* if */
 } /* free_avl_node */
@@ -203,7 +207,7 @@ static struct avl_node *avl_node_next(struct avl_node *n)
 
 static struct avl_node *avl_node_search(
 	struct avl_node *n,
-	const char *k,
+	const void *k,
 	AVL_FCOMP fc,
 	avl_equ *e)
 {
@@ -863,19 +867,21 @@ static void avl_node_print(struct avl_node *n, FILE *o)
 	if (n->left) avl_node_printL(n->left, o, "");
 } /* avl_node_print */
 
-AVL_TREE new_avl_tree(AVL_FCOMP fc)
+AVL_TREE new_avl_tree(AVL_FCOMP fc, AVL_FCONS fC, AVL_FDEST fD)
 {
 	AVL_TREE res;
-	assert(res = malloc(sizeof (AVL_TREE)));
+	assert(res = malloc(sizeof (struct avl_tree)));
 	res->sz = 0;
 	res->root = NULL;
 	res->fcomp = fc;
+	res->fcons = fC;
+	res->fdest = fD;
 	return res;
 } /* new_avl_tree */
 
 void avl_tree_clear(AVL_TREE t)
 {
-	free_avl_node(t->root);
+	free_avl_node(t->root, t->fdest);
 	t->root = NULL;
 	t->sz = 0;
 } /* avl_tree_clear */
@@ -902,7 +908,7 @@ AVL_ITERATOR avl_tree_last(AVL_TREE t)
 
 AVL_ITERATOR avl_tree_atkey(
 	AVL_TREE t,
-	const char *k,
+	const void *k,
 	AVL_MT ex)
 {
 	avl_equ e;
@@ -939,7 +945,7 @@ AVL_ITERATOR avl_tree_atkey(
 
 AVL_ITERATOR avl_tree_put(
 	AVL_TREE t,
-	const char *k,
+	const void *k,
 	void *d)
 {
 	avl_equ e;
@@ -949,7 +955,7 @@ AVL_ITERATOR avl_tree_put(
 
 	if (!t->root) {
 		/* PRIMER NODO EN EL ÁRBOL */
-		t->root = new_avl_node(k, d, NULL);
+		t->root = new_avl_node(k, d, NULL, t->fcons);
 		t->sz++; return t->root;
 	} /* if */
 
@@ -957,9 +963,9 @@ AVL_ITERATOR avl_tree_put(
 
 	switch(e) {
 	case AVL_EQU: p->data = d; return p;
-	case AVL_LFT: p->left = new_avl_node(k, d, p);
+	case AVL_LFT: p->left = new_avl_node(k, d, p, t->fcons);
 		t->sz++; p = p->left; break;
-	case AVL_RGT: p->right = new_avl_node(k, d, p);
+	case AVL_RGT: p->right = new_avl_node(k, d, p, t->fcons);
 		t->sz++; p = p->right; break;
 	} /* switch */
 
@@ -1032,7 +1038,7 @@ AVL_ITERATOR avl_tree_put(
 	return res;
 } /* avl_tree_put */
 
-int avl_tree_del(AVL_TREE t, const char *k)
+int avl_tree_del(AVL_TREE t, const void *k)
 {
 	avl_equ e;
 	struct avl_node *p;
@@ -1042,7 +1048,7 @@ int avl_tree_del(AVL_TREE t, const char *k)
 	if (e != AVL_EQU) return FALSE; /* no existe, no borramos nada. */
 
 	p = avl_node_unlink(p, &t->root); /* lo desligamos y lo borramos. */
-	free_avl_node(p);
+	free_avl_node(p, t->fdest);
 	t->sz--;
 
 	return TRUE;
@@ -1057,7 +1063,7 @@ void avl_iterator_del(
 	if (!i) return;
 
 	p = avl_node_unlink(i, &t->root);
-	free_avl_node(p);
+	free_avl_node(p, t->fdest);
 	t->sz--;
 } /* avl_iterator_del */
 
@@ -1071,7 +1077,7 @@ int avl_tree_size(struct avl_tree *t)
 	return t->sz;
 } /* avl_tree_size */
 
-int avl_tree_has(AVL_TREE t, const char *k)
+int avl_tree_has(AVL_TREE t, const void *k)
 {
 	avl_equ e;
 
@@ -1081,7 +1087,7 @@ int avl_tree_has(AVL_TREE t, const char *k)
 	return e == AVL_EQU;
 } /* avl_tree_has */
 
-void *avl_tree_get(AVL_TREE t, const char *k)
+void *avl_tree_get(AVL_TREE t, const void *k)
 {
 	avl_equ e;
 	struct avl_node *p;
@@ -1112,7 +1118,7 @@ AVL_ITERATOR avl_iterator_prev(AVL_ITERATOR i)
 	return avl_node_prev(i);
 } /* avl_iterator_prev */
 
-char *avl_iterator_key(AVL_ITERATOR i)
+const void *avl_iterator_key(AVL_ITERATOR i)
 {
 	return i->key;
 } /* avl_iterator_key */
@@ -1122,6 +1128,6 @@ void *avl_iterator_data(AVL_ITERATOR i)
 	return i->data;
 } /* avl_iterator_data */
 
-/* $Id: avl.c,v 1.1 2013/11/21 23:01:23 luis Exp $ */
+/* $Id: avl.c,v 1.2 2013/11/21 23:18:30 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */

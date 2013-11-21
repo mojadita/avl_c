@@ -1,4 +1,4 @@
-/* $Id: avl.h,v 1.1 2013/11/21 23:01:23 luis Exp $
+/* $Id: avl.h,v 1.2 2013/11/21 23:18:30 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Tue Aug  4 20:23:01     2009
  *
@@ -23,7 +23,7 @@
 
 #include <stdio.h> /* por FILE, etc. */
 
-static char AVL_H_RCSId[] = "\n$Id: avl.h,v 1.1 2013/11/21 23:01:23 luis Exp $\n";
+static char AVL_H_RCSId[] = "\n$Id: avl.h,v 1.2 2013/11/21 23:18:30 luis Exp $\n";
 
 /* types */
 /* AVL_MT Match type.  Allows to select the match type for a key search.
@@ -40,7 +40,15 @@ typedef enum {
 /* the next type is for a pointer to compare strings, so we can use
  * different ordering functions in tree maps.  It's used in the tree
  * constructor. */
-typedef int (*AVL_FCOMP)(const char *s1, const char *s2);
+typedef int (*AVL_FCOMP)(const void *k1, const void *k2);
+
+/* the next type is for a copy constructor for the key, so we can use
+ * different key types if we have a proper constructor and a proper
+ * destructor. */
+typedef const void *(*AVL_FCONS)(const void *k);
+
+/* the next type is for the destructor for the key. */
+typedef void (*AVL_FDEST)(const void *k);
 
 /* the iterator type, incomplete opaque type */
 typedef struct avl_node *AVL_ITERATOR;
@@ -55,7 +63,9 @@ typedef struct avl_tree *AVL_TREE;
  * that AVL_TREE is only a reference pointer to an opaque object.  No
  * operations are permitted apart of the ones exported by this module. */
 AVL_TREE new_avl_tree(
-	AVL_FCOMP fc /* comparator function, see above. */
+	AVL_FCOMP fc, /* key comparator function, see above. */
+	AVL_FCONS fC, /* key constructor function, see above. */
+	AVL_FDEST fD /* key destructor function, see above. */
 ); /* Tested Mon Apr  9 10:34:05 CEST 2012 OK*/
 
 /* AVL_TREE destructor. Call this function when you don't need anymore the
@@ -93,7 +103,7 @@ AVL_ITERATOR avl_tree_last(
  * NULL in case it doesn't exist in the map. */
 AVL_ITERATOR avl_tree_atkey(
 	AVL_TREE t, /* the tree descriptor */
-	const char *k, /* the key searched */
+	const void *k, /* the key searched */
 	AVL_MT mt /* true for exact match of false if we want a nearest key */
 ); /* Mon Apr  9 11:09:27 CEST 2012 */
 
@@ -102,7 +112,7 @@ AVL_ITERATOR avl_tree_atkey(
  * existent, the function creates a key. */
 AVL_ITERATOR avl_tree_put(
 	AVL_TREE t, /* the tree descriptor */
-	const char *k, /* the pair key */
+	const void *k, /* the pair key */
 	void *d /* the pair data pointer */
 ); /* Tested Mon Apr  9 10:35:28 CEST 2012 OK*/
 
@@ -110,7 +120,7 @@ AVL_ITERATOR avl_tree_put(
  * The function returns TRUE if deleted successfully and FALSE otherwise. */
 int avl_tree_del(
 	AVL_TREE t, /* the tree descriptor */
-	const char *k /* the key to be deleted. */
+	const void *k /* the key to be deleted. */
 ); /* Tested Mon Apr  9 10:35:38 CEST 2012 OK*/
 
 /* This function deletes the <key,data> pair pointed to by iterator i.
@@ -134,13 +144,13 @@ int avl_tree_size(
 /* This function returns TRUE if tree t has a key named k. */
 int avl_tree_has(
 	AVL_TREE t, /* the tree to be searched.  */
-	const char *k /* the key to search for. */
+	const void *k /* the key to search for. */
 ); /* Mon Apr  9 10:36:17 CEST 2012 */
 
 /* This function returns the data pointer for key k in tree t. */
 void *avl_tree_get(
 	AVL_TREE t, /* the tree to be searched for. */
-	const char *k /* the key to search. */
+	const void *k /* the key to search. */
 ); /* Mon Apr  9 10:36:32 CEST 2012 */
 
 /* This function pretty prints a tree description of tree t. */
@@ -162,7 +172,7 @@ AVL_ITERATOR avl_iterator_prev(
 ); /* Tested Mon Apr  9 10:37:07 CEST 2012 */
 
 /* This function gets the iterator key of a pair. */
-char *avl_iterator_key(
+const void *avl_iterator_key(
 	AVL_ITERATOR i /* iterator to get key from */
 ); /* Tested Mon Apr  9 10:37:17 CEST 2012 */
 
@@ -174,6 +184,6 @@ void *avl_iterator_data(
 #endif /* AVL_H */
 /* Do not include anything AFTER the line above, as it would not be
  * protected against double inclusion from other files.  */
-/* $Id: avl.h,v 1.1 2013/11/21 23:01:23 luis Exp $ */
+/* $Id: avl.h,v 1.2 2013/11/21 23:18:30 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */

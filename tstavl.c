@@ -1,4 +1,4 @@
-/* $Id: tstavl.c,v 1.1 2013/11/21 23:01:23 luis Exp $
+/* $Id: tstavl.c,v 1.2 2013/11/21 23:18:30 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Aug 13 19:38:00     2009
  *
@@ -18,11 +18,12 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
 #include <ctype.h>
 #include "avl.h"
 
 /* variables */
-static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.1 2013/11/21 23:01:23 luis Exp $\n";
+static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.2 2013/11/21 23:18:30 luis Exp $\n";
 
 void help()
 {
@@ -52,7 +53,7 @@ void help()
 int main (int argc, char **argv)
 {
 	char buffer[1024];
-	AVL_TREE t = new_avl_tree(strcmp);
+	AVL_TREE t = new_avl_tree((AVL_FCOMP)strcmp, (AVL_FCONS)strdup, (AVL_FDEST)free);
 
 	help();
 	while (fgets(buffer, sizeof buffer, stdin)) {
@@ -80,7 +81,7 @@ int main (int argc, char **argv)
 		default: help(); continue;
 		case '*':
 			for (i = avl_tree_first(t); i; i = avl_iterator_next(i)) {
-				time_t t = avl_iterator_data(i);
+				time_t t = (time_t) avl_iterator_data(i);
 				printf("%s: [%s]\n",
 					strtok(asctime(localtime(&t)),"\n"),
 					avl_iterator_key(i));
@@ -88,7 +89,7 @@ int main (int argc, char **argv)
 			continue;
 		case '/':
 			for (i = avl_tree_last(t); i; i = avl_iterator_prev(i)) {
-				time_t t = avl_iterator_data(i);
+				time_t t = (time_t) avl_iterator_data(i);
 				printf("%s: [%s]\n",
 					strtok(asctime(localtime(&t)),"\n"),
 					avl_iterator_key(i));
@@ -136,4 +137,6 @@ exit:
 	return 0;
 } /* main */
 
-/* $Id: tstavl.c,v 1.1 2013/11/21 23:01:23 luis Exp $ */
+/* $Id: tstavl.c,v 1.2 2013/11/21 23:18:30 luis Exp $ */
+/* vim: ts=4 sw=4 nu
+ */
