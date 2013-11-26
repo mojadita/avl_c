@@ -1,4 +1,4 @@
-/* $Id: tstavl.c,v 1.2 2013/11/21 23:18:30 luis Exp $
+/* $Id: tstavl.c,v 1.3 2013/11/26 18:22:30 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Aug 13 19:38:00     2009
  *
@@ -16,6 +16,7 @@
 
 /* Standard include files */
 #include <sys/time.h>
+#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
@@ -23,7 +24,7 @@
 #include "avl.h"
 
 /* variables */
-static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.2 2013/11/21 23:18:30 luis Exp $\n";
+static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.3 2013/11/26 18:22:30 luis Exp $\n";
 
 void help()
 {
@@ -137,6 +138,6 @@ exit:
 	return 0;
 } /* main */
 
-/* $Id: tstavl.c,v 1.2 2013/11/21 23:18:30 luis Exp $ */
+/* $Id: tstavl.c,v 1.3 2013/11/26 18:22:30 luis Exp $ */
 /* vim: ts=4 sw=4 nu
  */
