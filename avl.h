@@ -1,4 +1,4 @@
-/* $Id: avl.h,v 1.2 2013/11/21 23:18:30 luis Exp $
+/* $Id: avl.h,v 1.3 2014/01/04 09:16:26 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Tue Aug  4 20:23:01     2009
  *
@@ -23,7 +23,7 @@
 
 #include <stdio.h> /* por FILE, etc. */
 
-static char AVL_H_RCSId[] = "\n$Id: avl.h,v 1.2 2013/11/21 23:18:30 luis Exp $\n";
+static char AVL_H_RCSId[] = "\n$Id: avl.h,v 1.3 2014/01/04 09:16:26 luis Exp $\n";
 
 /* types */
 /* AVL_MT Match type.  Allows to select the match type for a key search.
@@ -125,7 +125,7 @@ int avl_tree_del(
 
 /* This function deletes the <key,data> pair pointed to by iterator i.
  * i must be a valid iterator on tree t.  */
-void avl_iterator_del(
+int avl_iterator_del(
 	AVL_ITERATOR i, /* iterator pointing to a valid pair in tree t. */
 	AVL_TREE t /* tree descriptor of tree whose element pair is
 				* going to be deleted.  */
@@ -184,6 +184,6 @@ void *avl_iterator_data(
 #endif /* AVL_H */
 /* Do not include anything AFTER the line above, as it would not be
  * protected against double inclusion from other files.  */
-/* $Id: avl.h,v 1.2 2013/11/21 23:18:30 luis Exp $ */
+/* $Id: avl.h,v 1.3 2014/01/04 09:16:26 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */

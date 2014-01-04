@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.2 2013/11/21 23:18:30 luis Exp $
+/* $Id: avl.c,v 1.3 2014/01/04 09:16:26 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Wed Oct  7 17:57:51     2009
  *
@@ -122,7 +122,7 @@ static void avl_node_print(
 	FILE *o);
 
 /* variables */
-static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.2 2013/11/21 23:18:30 luis Exp $\n";
+static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.3 2014/01/04 09:16:26 luis Exp $\n";
 
 /* functions */
 static char *avl_equ2str(avl_equ equ)
@@ -1054,17 +1054,18 @@ int avl_tree_del(AVL_TREE t, const void *k)
 	return TRUE;
 } /* avl_tree_del */
 
-void avl_iterator_del(
+int avl_iterator_del(
 	AVL_ITERATOR i,
 	AVL_TREE t)
 {
 	struct avl_node *p;
-	if (!t->root) return;
-	if (!i) return;
+	if (!t->root) return FALSE;
+	if (!i) return FALSE;
 
 	p = avl_node_unlink(i, &t->root);
 	free_avl_node(p, t->fdest);
 	t->sz--;
+	return TRUE;
 } /* avl_iterator_del */
 
 int avl_tree_empty(AVL_TREE t)
@@ -1128,6 +1129,6 @@ void *avl_iterator_data(AVL_ITERATOR i)
 	return i->data;
 } /* avl_iterator_data */
 
-/* $Id: avl.c,v 1.2 2013/11/21 23:18:30 luis Exp $ */
+/* $Id: avl.c,v 1.3 2014/01/04 09:16:26 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */
