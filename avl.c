@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.3 2014/01/04 09:16:26 luis Exp $
+/* $Id: avl.c,v 1.4 2014/01/07 18:51:36 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Wed Oct  7 17:57:51     2009
  *
@@ -71,6 +71,7 @@ struct avl_tree {
 	AVL_FCOMP			fcomp;
 	AVL_FCONS			fcons;
 	AVL_FDEST			fdest;
+	AVL_FPRNT			fprnt;
 };
 
 /* prototypes */
@@ -109,20 +110,20 @@ static void avl_node_equilibrateRL(
 	struct avl_node **const rt);
 static int avl_node_printNode(
 	struct avl_node *n, FILE *o,
-	const char *pfx);
+	const char *pfx, AVL_FPRNT fp);
 static void avl_node_printL(
 	struct avl_node *n, FILE *o,
-	const char *pfx);
+	const char *pfx, AVL_FPRNT fp);
 static void avl_node_printR(
 	struct avl_node *n,
 	FILE *o,
-	const char *pfx);
+	const char *pfx, AVL_FPRNT fp);
 static void avl_node_print(
 	struct avl_node *n,
-	FILE *o);
+	FILE *o, AVL_FPRNT fp);
 
 /* variables */
-static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.3 2014/01/04 09:16:26 luis Exp $\n";
+static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.4 2014/01/07 18:51:36 luis Exp $\n";
 
 /* functions */
 static char *avl_equ2str(avl_equ equ)
@@ -772,12 +773,12 @@ static int pr_n = 0;
 static int avl_node_printNode(
 	struct avl_node *n,
 	FILE *o,
-	const char *pfx)
+	const char *pfx, AVL_FPRNT fp)
 {
 	int res = 0;
 	strcpy(pr_buf + pr_n, pfx);
 	res += fprintf(o,
-		"%s (%s);"
+		"%slvl=%d;"
 #if PRINT_ALL
 		" [%p];"
 		" p=%p;"
@@ -785,9 +786,9 @@ static int avl_node_printNode(
 		" r=%p;"
 		" d=%p;"
 #endif
-		" eq=%s;"
-		"\n",
-		pr_buf, n->key,
+		" eq=%s; (",
+		pr_buf,
+		avl_node_level(n),
 #if PRINT_ALL
 		n,
 		n->parent,
@@ -796,6 +797,8 @@ static int avl_node_printNode(
 		n->data,
 #endif
 		avl_equ2str(n->equi));
+	if (fp) res += fp(o, n->key);
+	res += fprintf(o,");\n");
 	pr_buf[pr_n] = '\0';
 	return res;
 } /* avl_node_printNode */
@@ -803,7 +806,8 @@ static int avl_node_printNode(
 static void avl_node_printL(
 	struct avl_node *n,
 	FILE *o,
-	const char *prf)
+	const char *prf,
+	AVL_FPRNT pf)
 {
 	int l = pr_n;
 	strcpy(pr_buf + pr_n, prf);
@@ -811,16 +815,16 @@ static void avl_node_printL(
 
 	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
 	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
-	if (n->right) avl_node_printR(n->right, o, "\xe2\x94\x82");
+	if (n->right) avl_node_printR(n->right, o, "\xe2\x94\x82", pf);
 	avl_node_printNode(n, o, n->right
 		? (n->left
 			? "\xe2\x95\xb0\xe2\x94\xbc"
 			: "\xe2\x95\xb0\xe2\x94\xb4")
 		: (n->left
 			? "\xe2\x95\xb0\xe2\x94\xac"
-			: "\xe2\x95\xb0\xe2\x94\x80"));
+			: "\xe2\x95\xb0\xe2\x94\x80"), pf);
 	/* llamada recursiva del lado izquierdo */
-	if (n->left) avl_node_printL(n->left, o, " ");
+	if (n->left) avl_node_printL(n->left, o, " ", pf);
 	pr_n = l;
 	pr_buf[l] = '\0';
 } /* avl_node_printL */
@@ -828,7 +832,7 @@ static void avl_node_printL(
 static void avl_node_printR(
 	struct avl_node *n,
 	FILE *o,
-	const char *prf)
+	const char *prf, AVL_FPRNT pf)
 {
 	int l = pr_n;
 	strcpy(pr_buf + pr_n, prf);
@@ -836,38 +840,38 @@ static void avl_node_printR(
 
 	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
 	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
-	if (n->right) avl_node_printR(n->right, o, " ");
+	if (n->right) avl_node_printR(n->right, o, " ", pf);
 	avl_node_printNode(n, o, n->right
 		? (n->left
 			? "\xe2\x95\xad\xe2\x94\xbc"
 			: "\xe2\x95\xad\xe2\x94\xb4")
 		: (n->left
 			? "\xe2\x95\xad\xe2\x94\xac"
-			: "\xe2\x95\xad\xe2\x94\x80"));
+			: "\xe2\x95\xad\xe2\x94\x80"), pf);
 	/* llamada recursiva del lado izquierdo */
 	if (n->left)
 		avl_node_printL(n->left, o,
-			"\xe2\x94\x82");
+			"\xe2\x94\x82", pf);
 	pr_n = l;
 	pr_buf[l] = '\0';
 } /* avl_node_printR */
 
-static void avl_node_print(struct avl_node *n, FILE *o)
+static void avl_node_print(struct avl_node *n, FILE *o, AVL_FPRNT pf)
 {
 	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
 	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
-	if (n->right) avl_node_printR(n->right, o, "");
+	if (n->right) avl_node_printR(n->right, o, "", pf);
 	avl_node_printNode(n, o, n->right
 		? (n->left
 			? "\xe2\x94\xbc"
 			: "\xe2\x94\xb4")
 		: (n->left
 			? "\xe2\x94\xac"
-			: "\xe2\x94\x80"));
-	if (n->left) avl_node_printL(n->left, o, "");
+			: "\xe2\x94\x80"), pf);
+	if (n->left) avl_node_printL(n->left, o, "", pf);
 } /* avl_node_print */
 
-AVL_TREE new_avl_tree(AVL_FCOMP fc, AVL_FCONS fC, AVL_FDEST fD)
+AVL_TREE new_avl_tree(AVL_FCOMP fc, AVL_FCONS fC, AVL_FDEST fD, AVL_FPRNT fP)
 {
 	AVL_TREE res;
 	assert(res = malloc(sizeof (struct avl_tree)));
@@ -876,6 +880,7 @@ AVL_TREE new_avl_tree(AVL_FCOMP fc, AVL_FCONS fC, AVL_FDEST fD)
 	res->fcomp = fc;
 	res->fcons = fC;
 	res->fdest = fD;
+	res->fprnt = fP;
 	return res;
 } /* new_avl_tree */
 
@@ -1104,7 +1109,7 @@ void *avl_tree_get(AVL_TREE t, const void *k)
 void avl_tree_print(AVL_TREE t, FILE *o)
 {
 	if (t->root)
-	avl_node_print(t->root, o);
+	avl_node_print(t->root, o, t->fprnt);
 } /* avl_tree_print */
 
 AVL_ITERATOR avl_iterator_next(AVL_ITERATOR i)
@@ -1129,6 +1134,6 @@ void *avl_iterator_data(AVL_ITERATOR i)
 	return i->data;
 } /* avl_iterator_data */
 
-/* $Id: avl.c,v 1.3 2014/01/04 09:16:26 luis Exp $ */
+/* $Id: avl.c,v 1.4 2014/01/07 18:51:36 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */

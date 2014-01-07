@@ -1,4 +1,4 @@
-/* $Id: tstavl.c,v 1.3 2013/11/26 18:22:30 luis Exp $
+/* $Id: tstavl.c,v 1.4 2014/01/07 18:51:36 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Aug 13 19:38:00     2009
  *
@@ -24,7 +24,7 @@
 #include "avl.h"
 
 /* variables */
-static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.3 2013/11/26 18:22:30 luis Exp $\n";
+static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.4 2014/01/07 18:51:36 luis Exp $\n";
 
 void help()
 {
@@ -50,11 +50,20 @@ void help()
 	);
 } /* help */
 
+int printkey(FILE *o, char *s)
+{
+	return fprintf(o, "%s", s);
+} /* printkey */
+
 /* main program */
 int main (int argc, char **argv)
 {
 	char buffer[1024];
-	AVL_TREE t = new_avl_tree((AVL_FCOMP)strcmp, (AVL_FCONS)strdup, (AVL_FDEST)free);
+	AVL_TREE t = new_avl_tree(
+			(AVL_FCOMP)strcmp,
+			(AVL_FCONS)strdup,
+			(AVL_FDEST)free,
+			(AVL_FPRNT)printkey);
 
 	help();
 	while (fgets(buffer, sizeof buffer, stdin)) {
@@ -138,6 +147,6 @@ exit:
 	return 0;
 } /* main */
 
-/* $Id: tstavl.c,v 1.3 2013/11/26 18:22:30 luis Exp $ */
+/* $Id: tstavl.c,v 1.4 2014/01/07 18:51:36 luis Exp $ */
 /* vim: ts=4 sw=4 nu
  */

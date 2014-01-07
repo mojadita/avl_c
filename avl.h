@@ -1,4 +1,4 @@
-/* $Id: avl.h,v 1.3 2014/01/04 09:16:26 luis Exp $
+/* $Id: avl.h,v 1.4 2014/01/07 18:51:36 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Tue Aug  4 20:23:01     2009
  *
@@ -23,7 +23,7 @@
 
 #include <stdio.h> /* por FILE, etc. */
 
-static char AVL_H_RCSId[] = "\n$Id: avl.h,v 1.3 2014/01/04 09:16:26 luis Exp $\n";
+static char AVL_H_RCSId[] = "\n$Id: avl.h,v 1.4 2014/01/07 18:51:36 luis Exp $\n";
 
 /* types */
 /* AVL_MT Match type.  Allows to select the match type for a key search.
@@ -50,6 +50,9 @@ typedef const void *(*AVL_FCONS)(const void *k);
 /* the next type is for the destructor for the key. */
 typedef void (*AVL_FDEST)(const void *k);
 
+/* the next type if for printing the key part of an item */
+typedef int (*AVL_FPRNT)(FILE *o, const void *k);
+
 /* the iterator type, incomplete opaque type */
 typedef struct avl_node *AVL_ITERATOR;
 
@@ -65,7 +68,8 @@ typedef struct avl_tree *AVL_TREE;
 AVL_TREE new_avl_tree(
 	AVL_FCOMP fc, /* key comparator function, see above. */
 	AVL_FCONS fC, /* key constructor function, see above. */
-	AVL_FDEST fD /* key destructor function, see above. */
+	AVL_FDEST fD, /* key destructor function, see above. */
+	AVL_FPRNT fP
 ); /* Tested Mon Apr  9 10:34:05 CEST 2012 OK*/
 
 /* AVL_TREE destructor. Call this function when you don't need anymore the
@@ -184,6 +188,6 @@ void *avl_iterator_data(
 #endif /* AVL_H */
 /* Do not include anything AFTER the line above, as it would not be
  * protected against double inclusion from other files.  */
-/* $Id: avl.h,v 1.3 2014/01/04 09:16:26 luis Exp $ */
+/* $Id: avl.h,v 1.4 2014/01/07 18:51:36 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */
