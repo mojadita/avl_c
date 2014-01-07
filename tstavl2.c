@@ -1,4 +1,4 @@
-/* $Id: tstavl2.c,v 1.5 2014/01/07 20:03:15 luis Exp $
+/* $Id: tstavl2.c,v 1.6 2014/01/07 20:27:10 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Aug 13 19:38:00     2009
  *
@@ -21,10 +21,10 @@
 #include <ctype.h>
 #include "intavl.h"
 
-#define N 100
+#define N 100000
 
 /* variables */
-static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl2.c,v 1.5 2014/01/07 20:03:15 luis Exp $\n";
+static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl2.c,v 1.6 2014/01/07 20:27:10 luis Exp $\n";
 
 void help()
 {
@@ -58,6 +58,6 @@ int main (int argc, char **argv)
 	return 0;
 } /* main */
 
-/* $Id: tstavl2.c,v 1.5 2014/01/07 20:03:15 luis Exp $ */
+/* $Id: tstavl2.c,v 1.6 2014/01/07 20:27:10 luis Exp $ */
 /* vim: ts=4 sw=4 nu
  */
