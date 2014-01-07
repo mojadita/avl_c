@@ -1,4 +1,4 @@
-/* $Id: tstavl2.c,v 1.4 2014/01/07 18:51:36 luis Exp $
+/* $Id: tstavl2.c,v 1.5 2014/01/07 20:03:15 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Aug 13 19:38:00     2009
  *
@@ -19,12 +19,12 @@
 #include <string.h>
 #include <malloc.h>
 #include <ctype.h>
-#include "avl.h"
+#include "intavl.h"
 
 #define N 100
 
 /* variables */
-static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl2.c,v 1.4 2014/01/07 18:51:36 luis Exp $\n";
+static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl2.c,v 1.5 2014/01/07 20:03:15 luis Exp $\n";
 
 void help()
 {
@@ -36,36 +36,10 @@ void help()
 	);
 } /* help */
 
-fcmp(int i, int j)
-{
-	return i < j
-		? -1
-		: i > j
-			? 1
-			: 0;
-}
-
-int fconst(int i)
-{
-	return i;
-}
-
-int fprnt(FILE *o, int i)
-{
-	return fprintf(o, "%d", i);
-}
-
-void fdest(int i)
-{} /* nula a propósito */
-
 /* main program */
 int main (int argc, char **argv)
 {
-	AVL_TREE t = new_avl_tree(
-			(AVL_FCOMP)fcmp,
-			(AVL_FCONS)fconst,
-			(AVL_FDEST)free,
-			(AVL_FPRNT)fprnt);
+	AVL_TREE t = new_intavl_tree();
 	int i;
 	AVL_ITERATOR p;
 
@@ -73,17 +47,17 @@ int main (int argc, char **argv)
 	help();
 
 	for (i = 0; i < N; i++) {
-		avl_tree_put(t, (void *)rand(), (void *)i);
+		intavl_tree_put(t, rand(), (void *)i);
 	}
 
-	for (p = avl_tree_first(t); p; p = avl_iterator_next(p)) {
-		printf("[%d]->%d\n", avl_iterator_key(p), avl_iterator_data(p));
+	for (p = intavl_tree_first(t); p; p = intavl_iterator_next(p)) {
+		printf("[%d]->%d\n", intavl_iterator_key(p), intavl_iterator_data(p));
 	}
-	avl_tree_print(t, stdout);
+	intavl_tree_print(t, stdout);
 
 	return 0;
 } /* main */
 
-/* $Id: tstavl2.c,v 1.4 2014/01/07 18:51:36 luis Exp $ */
+/* $Id: tstavl2.c,v 1.5 2014/01/07 20:03:15 luis Exp $ */
 /* vim: ts=4 sw=4 nu
  */

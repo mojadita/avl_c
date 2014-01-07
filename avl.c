@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.4 2014/01/07 18:51:36 luis Exp $
+/* $Id: avl.c,v 1.5 2014/01/07 20:03:15 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Wed Oct  7 17:57:51     2009
  *
@@ -123,15 +123,15 @@ static void avl_node_print(
 	FILE *o, AVL_FPRNT fp);
 
 /* variables */
-static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.4 2014/01/07 18:51:36 luis Exp $\n";
+static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.5 2014/01/07 20:03:15 luis Exp $\n";
 
 /* functions */
 static char *avl_equ2str(avl_equ equ)
 {
 	switch(equ) {
-	case AVL_RGT: return "\xe2\x86\x91";
-	case AVL_EQU: return "\xe2\x86\x95";
-	case AVL_LFT: return "\xe2\x86\x93";
+	case AVL_RGT: return "^" /* "\xe2\x86\x91" */;
+	case AVL_EQU: return "o" /* "\xe2\x86\x95" */;
+	case AVL_LFT: return "v" /* "\xe2\x86\x93" */;
 	default: return "\342\232\240";
 	} /* switch */
 } /* avl_equ2str */
@@ -786,7 +786,7 @@ static int avl_node_printNode(
 		" r=%p;"
 		" d=%p;"
 #endif
-		" eq=%s; (",
+		" eq=%s; k=(",
 		pr_buf,
 		avl_node_level(n),
 #if PRINT_ALL
@@ -1134,6 +1134,6 @@ void *avl_iterator_data(AVL_ITERATOR i)
 	return i->data;
 } /* avl_iterator_data */
 
-/* $Id: avl.c,v 1.4 2014/01/07 18:51:36 luis Exp $ */
+/* $Id: avl.c,v 1.5 2014/01/07 20:03:15 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */

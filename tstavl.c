@@ -1,4 +1,4 @@
-/* $Id: tstavl.c,v 1.4 2014/01/07 18:51:36 luis Exp $
+/* $Id: tstavl.c,v 1.5 2014/01/07 20:03:15 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Aug 13 19:38:00     2009
  *
@@ -21,10 +21,10 @@
 #include <string.h>
 #include <malloc.h>
 #include <ctype.h>
-#include "avl.h"
+#include "stravl.h"
 
 /* variables */
-static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.4 2014/01/07 18:51:36 luis Exp $\n";
+static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.5 2014/01/07 20:03:15 luis Exp $\n";
 
 void help()
 {
@@ -59,11 +59,7 @@ int printkey(FILE *o, char *s)
 int main (int argc, char **argv)
 {
 	char buffer[1024];
-	AVL_TREE t = new_avl_tree(
-			(AVL_FCOMP)strcmp,
-			(AVL_FCONS)strdup,
-			(AVL_FDEST)free,
-			(AVL_FPRNT)printkey);
+	AVL_TREE t = new_stravl_tree(strcmp);
 
 	help();
 	while (fgets(buffer, sizeof buffer, stdin)) {
@@ -71,42 +67,42 @@ int main (int argc, char **argv)
 		AVL_ITERATOR i;
 
 		if (!p) {
-			avl_tree_print(t, stdout);
+			stravl_tree_print(t, stdout);
 			continue;
 		} /* if */
 
 		switch (*p) {
 			AVL_MT op;
 		case '-': p++;
-			if (!avl_tree_del(t, p))
+			if (!stravl_tree_del(t, p))
 				printf("Error: no puedo borrar [%s]\n", p);
 			continue;
 		case '?': p++;
 			printf("%s: %s\n", p,
-				avl_tree_has(t, p)
+				stravl_tree_has(t, p)
 					? "TRUE"
 					: "FALSE");
 			continue;
-		case '+': p++; avl_tree_put(t, p, (void *)time(NULL)); continue;
+		case '+': p++; stravl_tree_put(t, p, (void *)time(NULL)); continue;
 		default: help(); continue;
 		case '*':
-			for (i = avl_tree_first(t); i; i = avl_iterator_next(i)) {
-				time_t t = (time_t) avl_iterator_data(i);
+			for (i = stravl_tree_first(t); i; i = stravl_iterator_next(i)) {
+				time_t t = (time_t) stravl_iterator_data(i);
 				printf("%s: [%s]\n",
 					strtok(asctime(localtime(&t)),"\n"),
-					avl_iterator_key(i));
+					stravl_iterator_key(i));
 			} /* for */
 			continue;
 		case '/':
-			for (i = avl_tree_last(t); i; i = avl_iterator_prev(i)) {
-				time_t t = (time_t) avl_iterator_data(i);
+			for (i = stravl_tree_last(t); i; i = stravl_iterator_prev(i)) {
+				time_t t = (time_t) stravl_iterator_data(i);
 				printf("%s: [%s]\n",
 					strtok(asctime(localtime(&t)),"\n"),
-					avl_iterator_key(i));
+					stravl_iterator_key(i));
 			} /* for */
 			continue;
 		case '#':
-			printf("#: %d\n", avl_tree_size(t));
+			printf("#: %d\n", stravl_tree_size(t));
 			continue;
 		case '=': p++;
 			op = MT_EQ;
@@ -125,14 +121,14 @@ int main (int argc, char **argv)
 				op = MT_G;
 			} /* if */
 common:
-			i = avl_tree_atkey(t, p, op);
-			if (i) printf("Busco \"%s\" -> [%s]\n", buffer, avl_iterator_key(i));
+			i = stravl_tree_atkey(t, p, op);
+			if (i) printf("Busco \"%s\" -> [%s]\n", buffer, stravl_iterator_key(i));
 			continue;
 		case '%':
-			avl_tree_clear(t);
+			stravl_tree_clear(t);
 			continue;
 		case '!':
-			printf("Empty: %s\n", avl_tree_empty(t) ? "TRUE" : "FALSE");
+			printf("Empty: %s\n", stravl_tree_empty(t) ? "TRUE" : "FALSE");
 			continue;
 		case '.': goto exit;
 		} /* switch */
@@ -147,6 +143,6 @@ exit:
 	return 0;
 } /* main */
 
-/* $Id: tstavl.c,v 1.4 2014/01/07 18:51:36 luis Exp $ */
+/* $Id: tstavl.c,v 1.5 2014/01/07 20:03:15 luis Exp $ */
 /* vim: ts=4 sw=4 nu
  */
