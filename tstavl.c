@@ -1,4 +1,4 @@
-/* $Id: tstavl.c,v 1.5 2014/01/07 20:03:15 luis Exp $
+/* $Id: tstavl.c,v 1.6 2014/01/07 23:46:03 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Aug 13 19:38:00     2009
  *
@@ -24,7 +24,7 @@
 #include "stravl.h"
 
 /* variables */
-static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.5 2014/01/07 20:03:15 luis Exp $\n";
+static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.6 2014/01/07 23:46:03 luis Exp $\n";
 
 void help()
 {
@@ -46,6 +46,7 @@ void help()
 		">id   realiza una búsqueda obteniendo la menor clave mayor que id.\n"
 		"#     devuelve el número de entradas de la tabla.\n"
 		"%%     borra todas las entradas de la tabla.\n"
+		"@n    genera n elementos aleatorios y los mezcla en la tabla.\n"
 		".     termina el programa.\n"
 	);
 } /* help */
@@ -60,6 +61,7 @@ int main (int argc, char **argv)
 {
 	char buffer[1024];
 	AVL_TREE t = new_stravl_tree(strcmp);
+	int NN = 0;
 
 	help();
 	while (fgets(buffer, sizeof buffer, stdin)) {
@@ -83,22 +85,22 @@ int main (int argc, char **argv)
 					? "TRUE"
 					: "FALSE");
 			continue;
-		case '+': p++; stravl_tree_put(t, p, (void *)time(NULL)); continue;
+		case '+': p++; stravl_tree_put(t, p, (void *)++NN); continue;
 		default: help(); continue;
 		case '*':
 			for (i = stravl_tree_first(t); i; i = stravl_iterator_next(i)) {
 				time_t t = (time_t) stravl_iterator_data(i);
-				printf("%s: [%s]\n",
-					strtok(asctime(localtime(&t)),"\n"),
-					stravl_iterator_key(i));
+				printf("%-32s: [%8d]\n",
+					stravl_iterator_key(i),
+					(int) stravl_iterator_data(i));
 			} /* for */
 			continue;
 		case '/':
 			for (i = stravl_tree_last(t); i; i = stravl_iterator_prev(i)) {
 				time_t t = (time_t) stravl_iterator_data(i);
-				printf("%s: [%s]\n",
-					strtok(asctime(localtime(&t)),"\n"),
-					stravl_iterator_key(i));
+				printf("%-32s: [%8d]\n",
+					stravl_iterator_key(i),
+					(int) stravl_iterator_data(i));
 			} /* for */
 			continue;
 		case '#':
@@ -126,7 +128,22 @@ common:
 			continue;
 		case '%':
 			stravl_tree_clear(t);
+			NN = 0;
 			continue;
+		case '@':
+			{	int i, N = 10;
+				sscanf(buffer+1, "%d", &N);
+				for (i = 0; i < N; i++) {
+					int j, n;
+					n = rand() % 8 + 6;
+					for (j = 0; j < n; j++) {
+						buffer[j] = (rand() % 26) + 'a';
+					}
+					buffer[j] = '\0';
+					stravl_tree_put(t, buffer, (void *) ++NN);
+				} /* for */
+			} /* block */
+			break;
 		case '!':
 			printf("Empty: %s\n", stravl_tree_empty(t) ? "TRUE" : "FALSE");
 			continue;
@@ -143,6 +160,6 @@ exit:
 	return 0;
 } /* main */
 
-/* $Id: tstavl.c,v 1.5 2014/01/07 20:03:15 luis Exp $ */
+/* $Id: tstavl.c,v 1.6 2014/01/07 23:46:03 luis Exp $ */
 /* vim: ts=4 sw=4 nu
  */

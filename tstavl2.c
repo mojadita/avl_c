@@ -1,4 +1,4 @@
-/* $Id: tstavl2.c,v 1.6 2014/01/07 20:27:10 luis Exp $
+/* $Id: tstavl2.c,v 1.7 2014/01/07 23:46:03 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Aug 13 19:38:00     2009
  *
@@ -21,10 +21,10 @@
 #include <ctype.h>
 #include "intavl.h"
 
-#define N 100000
+#define N 10000
 
 /* variables */
-static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl2.c,v 1.6 2014/01/07 20:27:10 luis Exp $\n";
+static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl2.c,v 1.7 2014/01/07 23:46:03 luis Exp $\n";
 
 void help()
 {
@@ -50,14 +50,18 @@ int main (int argc, char **argv)
 		intavl_tree_put(t, rand(), (void *)i);
 	}
 
+#if 0
 	for (p = intavl_tree_first(t); p; p = intavl_iterator_next(p)) {
 		printf("[%d]->%d\n", intavl_iterator_key(p), intavl_iterator_data(p));
 	}
+#endif
 	intavl_tree_print(t, stdout);
+
+	printf("size = %d\n", avl_tree_size(t));
 
 	return 0;
 } /* main */
 
-/* $Id: tstavl2.c,v 1.6 2014/01/07 20:27:10 luis Exp $ */
+/* $Id: tstavl2.c,v 1.7 2014/01/07 23:46:03 luis Exp $ */
 /* vim: ts=4 sw=4 nu
  */
