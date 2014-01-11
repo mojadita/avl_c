@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.5 2014/01/07 20:03:15 luis Exp $
+/* $Id: avl.c,v 1.6 2014/01/11 14:41:30 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Wed Oct  7 17:57:51     2009
  *
@@ -123,7 +123,7 @@ static void avl_node_print(
 	FILE *o, AVL_FPRNT fp);
 
 /* variables */
-static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.5 2014/01/07 20:03:15 luis Exp $\n";
+static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.6 2014/01/11 14:41:30 luis Exp $\n";
 
 /* functions */
 static char *avl_equ2str(avl_equ equ)
@@ -818,11 +818,11 @@ static void avl_node_printL(
 	if (n->right) avl_node_printR(n->right, o, "\xe2\x94\x82", pf);
 	avl_node_printNode(n, o, n->right
 		? (n->left
-			? "\xe2\x95\xb0\xe2\x94\xbc"
-			: "\xe2\x95\xb0\xe2\x94\xb4")
+			? "\xe2\x94\x94\xe2\x94\xbc"
+			: "\xe2\x94\x94\xe2\x94\xb4")
 		: (n->left
-			? "\xe2\x95\xb0\xe2\x94\xac"
-			: "\xe2\x95\xb0\xe2\x94\x80"), pf);
+			? "\xe2\x94\x94\xe2\x94\xac"
+			: "\xe2\x94\x94\xe2\x94\x80"), pf);
 	/* llamada recursiva del lado izquierdo */
 	if (n->left) avl_node_printL(n->left, o, " ", pf);
 	pr_n = l;
@@ -843,11 +843,11 @@ static void avl_node_printR(
 	if (n->right) avl_node_printR(n->right, o, " ", pf);
 	avl_node_printNode(n, o, n->right
 		? (n->left
-			? "\xe2\x95\xad\xe2\x94\xbc"
-			: "\xe2\x95\xad\xe2\x94\xb4")
+			? "\xe2\x94\x8c\xe2\x94\xbc"
+			: "\xe2\x94\x8c\xe2\x94\xb4")
 		: (n->left
-			? "\xe2\x95\xad\xe2\x94\xac"
-			: "\xe2\x95\xad\xe2\x94\x80"), pf);
+			? "\xe2\x94\x8c\xe2\x94\xac"
+			: "\xe2\x94\x8c\xe2\x94\x80"), pf);
 	/* llamada recursiva del lado izquierdo */
 	if (n->left)
 		avl_node_printL(n->left, o,
@@ -1134,6 +1134,6 @@ void *avl_iterator_data(AVL_ITERATOR i)
 	return i->data;
 } /* avl_iterator_data */
 
-/* $Id: avl.c,v 1.5 2014/01/07 20:03:15 luis Exp $ */
+/* $Id: avl.c,v 1.6 2014/01/11 14:41:30 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */
