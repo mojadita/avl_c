@@ -1,4 +1,4 @@
-/* $Id: tstavl.c,v 1.6 2014/01/07 23:46:03 luis Exp $
+/* $Id: tstavl.c,v 1.7 2014/01/21 18:21:23 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Aug 13 19:38:00     2009
  *
@@ -18,13 +18,19 @@
 #include <sys/time.h>
 #include <time.h>
 #include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
 #include <ctype.h>
 #include "stravl.h"
 
 /* variables */
-static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.6 2014/01/07 23:46:03 luis Exp $\n";
+static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.7 2014/01/21 18:21:23 luis Exp $\n";
+
+#define FLAG_USEPAGER (1 << 0)
+static int flags = 0;
+static char *pager = "less";
 
 void help()
 {
@@ -62,6 +68,23 @@ int main (int argc, char **argv)
 	char buffer[1024];
 	AVL_TREE t = new_stravl_tree(strcmp);
 	int NN = 0;
+	int opt;
+
+	{ char *p;
+		if (p = getenv("PAGER")) {
+			pager = p;
+		}
+	}
+
+	signal(SIGPIPE, SIG_IGN);
+
+	while((opt = getopt(argc, argv, "ph")) != EOF) {
+		switch (opt) {
+			case 'p': flags |= FLAG_USEPAGER; break;
+			case 'h': default:
+					  help(); exit(EXIT_SUCCESS); break; 
+		} /* switch */
+	} /* while */
 
 	help();
 	while (fgets(buffer, sizeof buffer, stdin)) {
@@ -69,7 +92,11 @@ int main (int argc, char **argv)
 		AVL_ITERATOR i;
 
 		if (!p) {
-			stravl_tree_print(t, stdout);
+			FILE *o = flags & FLAG_USEPAGER
+				? popen(pager, "w")
+				: stdout;
+			stravl_tree_print(t, o);
+			if (flags & FLAG_USEPAGER) pclose(o);
 			continue;
 		} /* if */
 
@@ -87,21 +114,29 @@ int main (int argc, char **argv)
 			continue;
 		case '+': p++; stravl_tree_put(t, p, (void *)++NN); continue;
 		default: help(); continue;
-		case '*':
-			for (i = stravl_tree_first(t); i; i = stravl_iterator_next(i)) {
-				time_t t = (time_t) stravl_iterator_data(i);
-				printf("%-32s: [%8d]\n",
-					stravl_iterator_key(i),
-					(int) stravl_iterator_data(i));
-			} /* for */
+		case '*': { FILE *o = flags & FLAG_USEPAGER
+					  ? popen(pager, "w")
+					  : stdout ;
+				for (i = stravl_tree_first(t); i; i = stravl_iterator_next(i)) {
+					time_t t = (time_t) stravl_iterator_data(i);
+					fprintf(o, "%-32s: [%8d]\n",
+						stravl_iterator_key(i),
+						(int) stravl_iterator_data(i));
+				} /* for */
+				if (flags & FLAG_USEPAGER) pclose(o);
+			}
 			continue;
-		case '/':
-			for (i = stravl_tree_last(t); i; i = stravl_iterator_prev(i)) {
-				time_t t = (time_t) stravl_iterator_data(i);
-				printf("%-32s: [%8d]\n",
-					stravl_iterator_key(i),
-					(int) stravl_iterator_data(i));
-			} /* for */
+		case '/': { FILE *o = flags & FLAG_USEPAGER
+					  ? popen("less", "w")
+					  : stdout ;
+				for (i = stravl_tree_last(t); i; i = stravl_iterator_prev(i)) {
+					time_t t = (time_t) stravl_iterator_data(i);
+					fprintf(o, "%-32s: [%8d]\n",
+						stravl_iterator_key(i),
+						(int) stravl_iterator_data(i));
+				} /* for */
+				if (flags & FLAG_USEPAGER) pclose(o);
+			}
 			continue;
 		case '#':
 			printf("#: %d\n", stravl_tree_size(t));
@@ -160,6 +195,6 @@ exit:
 	return 0;
 } /* main */
 
-/* $Id: tstavl.c,v 1.6 2014/01/07 23:46:03 luis Exp $ */
+/* $Id: tstavl.c,v 1.7 2014/01/21 18:21:23 luis Exp $ */
 /* vim: ts=4 sw=4 nu
  */
