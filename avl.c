@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.7 2014/01/11 15:09:49 luis Exp $
+/* $Id: avl.c,v 1.8 2014/01/22 08:01:21 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Wed Oct  7 17:57:51     2009
  *
@@ -27,7 +27,7 @@
 
 /* constants */
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 			0
 #endif
 
 #ifdef DEB
@@ -40,7 +40,7 @@
 #endif
 
 #ifndef PRINT_ALL
-#define PRINT_ALL		(!DEBUG)
+#define PRINT_ALL		0
 #endif
 
 #ifndef FALSE
@@ -123,7 +123,7 @@ static void avl_node_print(
 	FILE *o, AVL_FPRNT fp);
 
 /* variables */
-static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.7 2014/01/11 15:09:49 luis Exp $\n";
+static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.8 2014/01/22 08:01:21 luis Exp $\n";
 
 /* functions */
 static char *avl_equ2str(avl_equ equ)
@@ -767,110 +767,6 @@ static void avl_node_equilibrateRL(
 	 */
 } /* avl_node_equilibrateRL */
 
-static char pr_buf[256];
-static int pr_n = 0;
-
-static int avl_node_printNode(
-	struct avl_node *n,
-	FILE *o,
-	const char *pfx, AVL_FPRNT fp)
-{
-	int res = 0;
-	strcpy(pr_buf + pr_n, pfx);
-	res += fprintf(o,
-		"%slvl=%d;"
-#if PRINT_ALL
-		" [%p];"
-		" p=%p;"
-		" l=%p;"
-		" r=%p;"
-		" d=%p;"
-#endif
-		" eq=%s; k=(",
-		pr_buf,
-		avl_node_level(n),
-#if PRINT_ALL
-		n,
-		n->parent,
-		n->left,
-		n->right,
-		n->data,
-#endif
-		avl_equ2str(n->equi));
-	if (fp) res += fp(o, n->key);
-	res += fprintf(o,");\n");
-	pr_buf[pr_n] = '\0';
-	return res;
-} /* avl_node_printNode */
-		
-static void avl_node_printL(
-	struct avl_node *n,
-	FILE *o,
-	const char *prf,
-	AVL_FPRNT pf)
-{
-	int l = pr_n;
-	strcpy(pr_buf + pr_n, prf);
-	pr_n += strlen(prf);
-
-	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
-	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
-	if (n->right) avl_node_printR(n->right, o, "\xe2\x94\x82", pf);
-	avl_node_printNode(n, o, n->right
-		? (n->left
-			? "\xe2\x94\x94\xe2\x94\xbc"
-			: "\xe2\x94\x94\xe2\x94\xb4")
-		: (n->left
-			? "\xe2\x94\x94\xe2\x94\xac"
-			: "\xe2\x94\x94\xe2\x94\x80"), pf);
-	/* llamada recursiva del lado izquierdo */
-	if (n->left) avl_node_printL(n->left, o, " ", pf);
-	pr_n = l;
-	pr_buf[l] = '\0';
-} /* avl_node_printL */
-
-static void avl_node_printR(
-	struct avl_node *n,
-	FILE *o,
-	const char *prf, AVL_FPRNT pf)
-{
-	int l = pr_n;
-	strcpy(pr_buf + pr_n, prf);
-	pr_n += strlen(prf);
-
-	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
-	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
-	if (n->right) avl_node_printR(n->right, o, " ", pf);
-	avl_node_printNode(n, o, n->right
-		? (n->left
-			? "\xe2\x94\x8c\xe2\x94\xbc"
-			: "\xe2\x94\x8c\xe2\x94\xb4")
-		: (n->left
-			? "\xe2\x94\x8c\xe2\x94\xac"
-			: "\xe2\x94\x8c\xe2\x94\x80"), pf);
-	/* llamada recursiva del lado izquierdo */
-	if (n->left)
-		avl_node_printL(n->left, o,
-			"\xe2\x94\x82", pf);
-	pr_n = l;
-	pr_buf[l] = '\0';
-} /* avl_node_printR */
-
-static void avl_node_print(struct avl_node *n, FILE *o, AVL_FPRNT pf)
-{
-	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
-	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
-	if (n->right) avl_node_printR(n->right, o, "", pf);
-	avl_node_printNode(n, o, n->right
-		? (n->left
-			? "\xe2\x94\xbc"
-			: "\xe2\x94\xb4")
-		: (n->left
-			? "\xe2\x94\xac"
-			: "\xe2\x94\x80"), pf);
-	if (n->left) avl_node_printL(n->left, o, "", pf);
-} /* avl_node_print */
-
 AVL_TREE new_avl_tree(AVL_FCOMP fc, AVL_FCONS fC, AVL_FDEST fD, AVL_FPRNT fP)
 {
 	AVL_TREE res;
@@ -1106,12 +1002,6 @@ void *avl_tree_get(AVL_TREE t, const void *k)
 		: NULL;
 } /* avl_tree_get */
 
-void avl_tree_print(AVL_TREE t, FILE *o)
-{
-	if (t->root)
-	avl_node_print(t->root, o, t->fprnt);
-} /* avl_tree_print */
-
 AVL_ITERATOR avl_iterator_next(AVL_ITERATOR i)
 {
 	if (!i) return NULL;
@@ -1134,6 +1024,123 @@ void *avl_iterator_data(AVL_ITERATOR i)
 	return i->data;
 } /* avl_iterator_data */
 
-/* $Id: avl.c,v 1.7 2014/01/11 15:09:49 luis Exp $ */
+/*************************/
+/* THE PRINTING ROUTINES */
+/*************************/
+
+static char pr_buf[256];
+static int pr_n = 0;
+
+static int avl_node_printNode(
+	struct avl_node *n,
+	FILE *o,
+	const char *pfx, AVL_FPRNT fp)
+{
+	int res = 0;
+	strcpy(pr_buf + pr_n, pfx);
+	res += fprintf(o,
+		"%s"
+		" k=[",
+		pr_buf);
+	if (fp) res += fp(o, n->key);
+	res += fprintf(o,
+		"];"
+		" e=%s;"
+		" l=%d;",
+		avl_equ2str(n->equi),
+		avl_node_level(n));
+#if PRINT_ALL
+	res += fprintf(o,
+		" ptr=%p;"
+		" prt=%p;"
+		" lft=%p;"
+		" rgt=%p;"
+		" dat=%p;",
+		n,
+		n->parent,
+		n->left,
+		n->right,
+		n->data);
+#endif
+	res += fprintf(o, "\n");
+	pr_buf[pr_n] = '\0';
+	return res;
+} /* avl_node_printNode */
+		
+static void avl_node_printL(
+	struct avl_node *n,
+	FILE *o,
+	const char *prf,
+	AVL_FPRNT pf)
+{
+	int l = pr_n;
+	strcpy(pr_buf + pr_n, prf);
+	pr_n += strlen(prf);
+
+	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
+	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
+	if (n->right) avl_node_printR(n->right, o, "\xe2\x94\x82", pf);
+	avl_node_printNode(n, o, n->right
+		? (n->left
+			? "\xe2\x94\x94\xe2\x94\xbc"
+			: "\xe2\x94\x94\xe2\x94\xb4")
+		: (n->left
+			? "\xe2\x94\x94\xe2\x94\xac"
+			: "\xe2\x94\x94\xe2\x94\x80"), pf);
+	/* llamada recursiva del lado izquierdo */
+	if (n->left) avl_node_printL(n->left, o, " ", pf);
+	pr_n = l;
+	pr_buf[l] = '\0';
+} /* avl_node_printL */
+
+static void avl_node_printR(
+	struct avl_node *n,
+	FILE *o,
+	const char *prf, AVL_FPRNT pf)
+{
+	int l = pr_n;
+	strcpy(pr_buf + pr_n, prf);
+	pr_n += strlen(prf);
+
+	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
+	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
+	if (n->right) avl_node_printR(n->right, o, " ", pf);
+	avl_node_printNode(n, o, n->right
+		? (n->left
+			? "\xe2\x94\x8c\xe2\x94\xbc"
+			: "\xe2\x94\x8c\xe2\x94\xb4")
+		: (n->left
+			? "\xe2\x94\x8c\xe2\x94\xac"
+			: "\xe2\x94\x8c\xe2\x94\x80"), pf);
+	/* llamada recursiva del lado izquierdo */
+	if (n->left)
+		avl_node_printL(n->left, o,
+			"\xe2\x94\x82", pf);
+	pr_n = l;
+	pr_buf[l] = '\0';
+} /* avl_node_printR */
+
+static void avl_node_print(struct avl_node *n, FILE *o, AVL_FPRNT pf)
+{
+	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
+	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
+	if (n->right) avl_node_printR(n->right, o, "", pf);
+	avl_node_printNode(n, o, n->right
+		? (n->left
+			? "\xe2\x94\xbc"
+			: "\xe2\x94\xb4")
+		: (n->left
+			? "\xe2\x94\xac"
+			: "\xe2\x94\x80"), pf);
+	if (n->left) avl_node_printL(n->left, o, "", pf);
+} /* avl_node_print */
+
+void avl_tree_print(AVL_TREE t, FILE *o)
+{
+	if (t->root)
+	avl_node_print(t->root, o, t->fprnt);
+} /* avl_tree_print */
+
+/* $Id: avl.c,v 1.8 2014/01/22 08:01:21 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */

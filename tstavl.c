@@ -1,4 +1,4 @@
-/* $Id: tstavl.c,v 1.7 2014/01/21 18:21:23 luis Exp $
+/* $Id: tstavl.c,v 1.8 2014/01/22 08:01:21 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Thu Aug 13 19:38:00     2009
  *
@@ -26,7 +26,7 @@
 #include "stravl.h"
 
 /* variables */
-static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.7 2014/01/21 18:21:23 luis Exp $\n";
+static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.8 2014/01/22 08:01:21 luis Exp $\n";
 
 #define FLAG_USEPAGER (1 << 0)
 static int flags = 0;
@@ -66,7 +66,7 @@ int printkey(FILE *o, char *s)
 int main (int argc, char **argv)
 {
 	char buffer[1024];
-	AVL_TREE t = new_stravl_tree(strcmp);
+	AVL_TREE t = new_stravl_tree(strcasecmp);
 	int NN = 0;
 	int opt;
 
@@ -195,6 +195,6 @@ exit:
 	return 0;
 } /* main */
 
-/* $Id: tstavl.c,v 1.7 2014/01/21 18:21:23 luis Exp $ */
+/* $Id: tstavl.c,v 1.8 2014/01/22 08:01:21 luis Exp $ */
 /* vim: ts=4 sw=4 nu
  */
