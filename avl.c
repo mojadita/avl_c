@@ -1,4 +1,4 @@
-/* $Id: avl.c,v 1.8 2014/01/22 08:01:21 luis Exp $
+/* $Id: avl.c,v 1.9 2014/08/08 19:10:09 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Wed Oct  7 17:57:51     2009
  *
@@ -123,7 +123,7 @@ static void avl_node_print(
 	FILE *o, AVL_FPRNT fp);
 
 /* variables */
-static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.8 2014/01/22 08:01:21 luis Exp $\n";
+static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.9 2014/08/08 19:10:09 luis Exp $\n";
 
 /* functions */
 static char *avl_equ2str(avl_equ equ)
@@ -1024,6 +1024,11 @@ void *avl_iterator_data(AVL_ITERATOR i)
 	return i->data;
 } /* avl_iterator_data */
 
+void avl_iterator_set_data(AVL_ITERATOR i, void *d)
+{
+	i->data = d;
+} /* avl_iterator_set_data */
+
 /*************************/
 /* THE PRINTING ROUTINES */
 /*************************/
@@ -1141,6 +1146,6 @@ void avl_tree_print(AVL_TREE t, FILE *o)
 	avl_node_print(t->root, o, t->fprnt);
 } /* avl_tree_print */
 
-/* $Id: avl.c,v 1.8 2014/01/22 08:01:21 luis Exp $ */
+/* $Id: avl.c,v 1.9 2014/08/08 19:10:09 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */

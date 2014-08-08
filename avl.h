@@ -1,4 +1,4 @@
-/* $Id: avl.h,v 1.4 2014/01/07 18:51:36 luis Exp $
+/* $Id: avl.h,v 1.5 2014/08/08 19:10:09 luis Exp $
  * Author: Luis Colorado <lc@luiscoloradosistemas.com>
  * Date: Tue Aug  4 20:23:01     2009
  *
@@ -23,7 +23,7 @@
 
 #include <stdio.h> /* por FILE, etc. */
 
-static char AVL_H_RCSId[] = "\n$Id: avl.h,v 1.4 2014/01/07 18:51:36 luis Exp $\n";
+static char AVL_H_RCSId[] = "\n$Id: avl.h,v 1.5 2014/08/08 19:10:09 luis Exp $\n";
 
 /* types */
 /* AVL_MT Match type.  Allows to select the match type for a key search.
@@ -185,9 +185,15 @@ void *avl_iterator_data(
 	AVL_ITERATOR i /* iterator to get data pointer from */
 ); /* Tested Mon Apr  9 10:37:30 CEST 2012 */
 
+/* This function set the data pointer associated to an iterator */
+void avl_iterator_set_data(
+	AVL_ITERATOR i, /* iterator to set data pointer to */
+	void *d /* data pointer to set */
+);
+
 #endif /* AVL_H */
 /* Do not include anything AFTER the line above, as it would not be
  * protected against double inclusion from other files.  */
-/* $Id: avl.h,v 1.4 2014/01/07 18:51:36 luis Exp $ */
+/* $Id: avl.h,v 1.5 2014/08/08 19:10:09 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
  */

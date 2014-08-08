@@ -1,10 +1,18 @@
-# $Id: Makefile,v 1.3 2014/01/07 20:03:14 luis Exp $
+# $Id: Makefile,v 1.4 2014/08/08 19:10:09 luis Exp $
 # Author: Luis Colorado <lc@luiscoloradosistemas.com>
 # Date: jue nov 21 23:48:42 CET 2013
 # Disclaimer: (C) 2013 LUIS COLORADO SISTEMAS S.L.U.
 # 		All rights reserved.
 
-targets = tstavl tstavl2
+MAJOR=2
+MINOR=1.9
+
+avl_lib_dev		= avl.so
+avl_soname		= $(avl_lib_dev).$(MAJOR)
+avl_lib			= $(avl_soname).$(MINOR)
+avl_lib_targets = $(avl_lib) $(avl_soname) $(avl_lib_dev)
+
+targets = $(avl_lib_targets) tstavl tstavl2
 
 .PHONY: all clean
 
@@ -12,7 +20,14 @@ all: $(targets)
 clean:
 	$(RM) $(targets) $(tstavl_objs)
 
-tstavl_objs = avl.o tstavl.o stravl.o
+$(avl_lib_dev): $(avl_soname)
+	ln -sf $< $@
+$(avl_soname): $(avl_lib)
+	ln -sf $< $@
+$(avl_lib): avl.c avl.h
+	$(CC) $(CFLAGS) -o $@ -fPIC -shared -Wl,-soname=$(avl_soname) $<
+
+tstavl_objs = tstavl.o stravl.o $(avl_lib)
 
 tstavl: $(tstavl_objs)
 	$(CC) $(LDFLAGS) -o tstavl $(tstavl_objs)
@@ -23,4 +38,4 @@ tstavl2: $(tstavl2_objs)
 
 avl.o tstavl.o tstavl2.o: avl.h
 
-# $Id: Makefile,v 1.3 2014/01/07 20:03:14 luis Exp $
+# $Id: Makefile,v 1.4 2014/08/08 19:10:09 luis Exp $
