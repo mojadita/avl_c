@@ -5,7 +5,7 @@
 # 		All rights reserved.
 
 MAJOR=1
-MINOR=1.11
+MINOR=1.12
 VERSION="$(MAJOR).$(MINOR)"
 CFLAGS += -DAVL_VERSION=\"$(VERSION)\"
 prefix=/usr
@@ -26,22 +26,22 @@ install: $(targets)
 	ln -f $(avl_lib_targets) $(prefix)/lib
 	ln -f avl.h $(prefix)/include
 
-$(avl_lib_dev): $(avl_soname)
+$(avl_lib_dev): $(avl_soname) Makefile
 	ln -sf $< $@
-$(avl_soname): $(avl_lib)
+$(avl_soname): $(avl_lib) Makefile
 	ln -sf $< $@
-$(avl_lib): avl.c avl.h
+$(avl_lib): avl.c avl.h Makefile
 	$(CC) $(CFLAGS) -o $@ -fPIC -shared -Wl,-soname=$(avl_soname) $<
 
 tstavl_objs = tstavl.o stravl.o $(avl_lib)
 
-tstavl: $(tstavl_objs)
+tstavl: $(tstavl_objs) Makefile
 	$(CC) $(LDFLAGS) -o tstavl $(tstavl_objs)
 
 tstavl2_objs = avl.o tstavl2.o intavl.o
-tstavl2: $(tstavl2_objs)
+tstavl2: $(tstavl2_objs) Makefile
 	$(CC) $(LDFLAGS) -o tstavl2 $(tstavl2_objs)
 
-avl.o tstavl.o tstavl2.o: avl.h
+avl.o tstavl.o tstavl2.o: avl.h Makefile
 
 # $Id: Makefile,v 1.5 2014/08/08 19:25:50 luis Exp $
