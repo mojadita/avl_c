@@ -57,11 +57,6 @@ void help()
 	);
 } /* help */
 
-int printkey(FILE *o, char *s)
-{
-	return fprintf(o, "%s", s);
-} /* printkey */
-
 /* main program */
 int main (int argc, char **argv)
 {

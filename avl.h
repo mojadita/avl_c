@@ -51,7 +51,7 @@ typedef const void *(*AVL_FCONS)(const void *k);
 typedef void (*AVL_FDEST)(const void *k);
 
 /* the next type if for printing the key part of an item */
-typedef int (*AVL_FPRNT)(FILE *o, const void *k);
+typedef int (*AVL_FPRNT)(const void *k, FILE *o);
 
 /* the iterator type, incomplete opaque type */
 typedef struct avl_node *AVL_ITERATOR;

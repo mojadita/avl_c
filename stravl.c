@@ -10,11 +10,6 @@
 #include <stdio.h>
 #include "stravl.h"
 
-static int strprnt(FILE *o, const char *s)
-{
-	return fprintf(o, "%s", s);
-} /* strprnt */
-
 AVL_TREE new_stravl_tree(STRAVL_FCOMP fc)
 {
 	if (!fc) fc = strcmp;
@@ -22,7 +17,7 @@ AVL_TREE new_stravl_tree(STRAVL_FCOMP fc)
 			(AVL_FCOMP)fc,
 			(AVL_FCONS)strdup,
 			(AVL_FDEST)free,
-			(AVL_FPRNT)strprnt);
+			(AVL_FPRNT)fputs);
 } /* new stravl_tree */
 
 AVL_ITERATOR stravl_tree_put(

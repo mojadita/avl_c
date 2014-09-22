@@ -1047,7 +1047,7 @@ static int avl_node_printNode(
 		"%s"
 		" k=[",
 		pr_buf);
-	if (fp) res += fp(o, n->key);
+	if (fp) res += fp(n->key, o);
 	res += fprintf(o,
 		"];"
 		" e=%s;"

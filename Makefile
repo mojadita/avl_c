@@ -4,8 +4,8 @@
 # Disclaimer: (C) 2013 LUIS COLORADO SISTEMAS S.L.U.
 # 		All rights reserved.
 
-MAJOR=1
-MINOR=1.13
+MAJOR=2
+MINOR=1.14
 VERSION="$(MAJOR).$(MINOR)"
 CFLAGS += -DAVL_VERSION=\"$(VERSION)\"
 prefix=/usr

@@ -25,7 +25,7 @@ static void intfree(void *i)
 	/* nada */
 } /* intfree */
 
-static int intprnt(FILE *o, const int i)
+static int intprnt(const int i, FILE *o)
 {
 	return fprintf(o, "%d", i);
 } /* intprnt */
