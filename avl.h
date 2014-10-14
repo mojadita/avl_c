@@ -23,8 +23,6 @@
 
 #include <stdio.h> /* por FILE, etc. */
 
-#define PR(X) __FILE__":%d:%s: " X, __LINE__, __func__
-
 static char AVL_H_RCSId[] = "\n$Id: avl.h,v 1.5 2014/08/08 19:10:09 luis Exp $\n";
 
 /* types */

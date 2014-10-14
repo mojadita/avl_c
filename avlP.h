@@ -19,8 +19,10 @@
 #endif
 #if DEBUG
 #define DEB(X) printf X
+#define PR(X) __FILE__":%d:%s: " X, __LINE__, __func__
 #else
 #define DEB(X)
+#define PR(X) X
 #endif
 
 #ifndef PRINT_ALL
