@@ -15,7 +15,7 @@ avl_soname		= $(avl_lib_dev).$(MAJOR)
 avl_lib			= $(avl_soname).$(MINOR)
 avl_lib_targets = $(avl_lib) $(avl_soname) $(avl_lib_dev)
 
-targets = $(avl_lib_targets) tstavl tstavl2
+targets = $(avl_lib_targets) tstavl tstavl2 tstavl3
 
 .PHONY: all clean
 
@@ -42,6 +42,11 @@ tstavl2_objs = tstavl2.o intavl.o $(avl_lib)
 tstavl2: $(tstavl2_objs) Makefile
 	$(CC) $(LDFLAGS) -o tstavl2 $(tstavl2_objs)
 
-avl.o tstavl.o tstavl2.o: avl.h Makefile
+tstavl3_objs = tstavl3.o
+tstavl3: $(tstavl3_objs) Makefile
+	$(CC) $(LDFLAGS) -o tstavl3 $(tstavl3_objs)
+
+tstavl3.o avl.o: avlP.h
+avl.o tstavl.o tstavl2.o tstavl3.o: avl.h Makefile
 
 # $Id: Makefile,v 1.5 2014/08/08 19:25:50 luis Exp $
