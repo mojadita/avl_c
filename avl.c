@@ -237,7 +237,7 @@ static struct avl_node *avl_node_search(
 } /* avl_node_search */
 
 static struct avl_node *avl_node_unlink(
-	struct avl_node *const n,
+	struct avl_node * const n,
 	struct avl_node ** const rt)
 {
 	struct avl_node *p = n, *q;
@@ -255,55 +255,54 @@ static struct avl_node *avl_node_unlink(
 		} /* switch */
 	} /* if */
 
-	/* 1.- p APUNTA AL NODO QUE VAMOS A BORRAR.
-	 * 2.- p NO TIENE AMBOS HIJOS.  (CASO CONTEMPLADO EN EL
-	 *     CASO ANTERIOR), ASÍ QUE HEMOS DE ELIMINARLO COMO
-	 *     SI DE UNA LISTA ENLAZADA SE TRATARA. */
+	/* 1.- p POINTS TO THE NODE BEING UNLINKED.
+	 * 2.- p HASN'T BOTH CHILDREN. (THIS CASE IS INCLUDED
+	 *     IN PREVIOUS CASE), SO WE HAVE TO UNLINK IT AS
+	 *     IF IT WERE IN A LINKED LIST. */
 
-	q = p->parent; /* q es el parent */
+	q = p->parent;
 
-	/* lo desligamos */
+	/* UNLINK IT */
 	res = p;
-	if (q) { /* hay parent. */
-		if (q->left == p) { /* es hijo izquierdo */
+	if (q) { /* we have a parent. */
+		if (q->left == p) { /* it is left child */
 			q->left = p->left ? p->left : p->right;
 			if (q->left) q->left->parent = q;
 			e = AVL_LFT;
-		} else { /* q->right == p */
+		} else { /* q->right == p, it is right child */
 			q->right = p->right ? p->right : p->left;
 			if (q->right) q->right->parent = q;
 			e = AVL_RGT;
 		} /* if */
-	} else { /* NO HAY PARENT, debemos tocar rt. */
+	} else { /* no parent, we have to touch *rt. */
 		*rt = p->left ? p->left : p->right;
 		if (*rt) (*rt)->parent = NULL;
 		p = *rt;
 		e = AVL_EQU;
 	} /* if */
 
-	/* AJUSTAMOS LOS PUNTEROS DEL NODO DESLIGADO */
+	/* ADJUST POINTERS IN UNLINKED NODE. */
 	res->left = res->right = res->parent = NULL;
 
-	/* res ESTÁ LISTO PARA SER DEVUELTO, YA HA SIDO DESLIGADO, AHORA
-	 * HAY QUE SUBIR POR EL ÁRBOL PARA EQUILIBRAR.
-	 * AHORA DEBEMOS SUBIR POR EL ÁRBOL MIENTRAS LA ALTURA HAYA
-	 * DISMINUIDO, BIEN HASTA QUE ENCONTREMOS UN NODO QUE SE
-	 * EQUILIBRA O UNO QUE SE DESEQUILIBRA DEMASIADO. */
+	/* res IS READY TO BE RETURNED, AS IT HAS BEEN UNLINKED, NOW
+	 * WE HAVE TO GO UP THROUGH THE TREE TO EQUILIBRATE.
+	 * WHILE THE TREE HEIGHT HAS DECREASED, WE HAVE TO FIND A NODE
+	 * THAT EQUILIBRATES OR ONE THAT DEEQUILIBRATES TOO MUCH. */
 	disminuido = TRUE;
 	while (disminuido && q) {
 		switch (e) {
-		case AVL_LFT: /* se perdió altura por la izquierda. */
+		case AVL_LFT: /* we lose height on the left */
 			switch (q->equi) {
 			case AVL_LFT: q->equi = AVL_EQU; break;
 			case AVL_EQU: q->equi = AVL_RGT; disminuido = FALSE; break;
 			case AVL_RGT:
 				switch (q->right->equi) {
 				case AVL_EQU: disminuido = FALSE;
-					/* OJO: NO HAY BREAK INTENCIONADAMENTE */
+					/* FALLTHROUGH */
 				case AVL_RGT:
-					/* en los borrados el equilibrado siempre hace
-					 * disminuir la altura, así que no tocamos la
-					 * variable disminuido. */
+					/* in unlinks equilibration always makes the
+					 * height to go smaller, so we don't touch 
+					 * disminuido variable. */
 					avl_node_equilibrateRR(q,
 						q->parent
 							? q->parent->left == q
@@ -312,9 +311,9 @@ static struct avl_node *avl_node_unlink(
 							: rt);
 					break;
 				case AVL_LFT:
-					/* en los borrados el equilibrado siempre hace
-					 * disminuir la altura, así que no tocamos la
-					 * variable disminuido. */
+					/* in unlinks equilibration always makes the
+					 * height to go smaller, so we don't touch 
+					 * disminuido variable. */
 					avl_node_equilibrateRL(q,
 						q->parent
 							? q->parent->right == q
@@ -323,22 +322,22 @@ static struct avl_node *avl_node_unlink(
 							: rt);
 					break;
 				} /* switch */
-				q = q->parent; /* para que apunte al nodo correcto. */
+				q = q->parent; /* so it points to the correct node. */
 				break;
 			} /* switch */
 			break;
-		case AVL_RGT: /* se perdió altura por la derecha. */
+		case AVL_RGT: /* we lost height on the right. */
 			switch(q->equi) {
 			case AVL_RGT: q->equi = AVL_EQU; break;
 			case AVL_EQU: q->equi = AVL_LFT; disminuido = FALSE; break;
-			case AVL_LFT: /* hay que equilibrar. */
+			case AVL_LFT: /* have to equilibrate. */
 				switch (q->left->equi) {
 				case AVL_EQU: disminuido = FALSE;
-					/* OJO, NO HAY BREAK INTENCIONADAMENTE */
+					/* FALLTHROUGH */
 				case AVL_LFT:
-					/* EN LOS BORRADOS EL EQUILIBRADO SIEMPRE HACE
-					 * DISMINUIR LA ALTURA, ASÍ QUE NO TOCAMOS LA
-					 * VARIABLE disminuido. */
+					/* ON UNLINK, THE EQUILIBRATION PROCEDURE ALWAYS
+					 * MAKES THE HEIGHT GO DOWN, SO WE DON'T TOUCH
+					 * disminuido VARIABLE. */
 					avl_node_equilibrateLL(q,
 						q->parent
 							? q->parent->right == q
@@ -347,9 +346,9 @@ static struct avl_node *avl_node_unlink(
 							: rt);
 					break;
 				case AVL_RGT:
-					/* EN LOS BORRADOS EL EQUILIBRADO SIEMPRE HACE
-					 * DISMINUIR LA ALTURA, ASÍ QUE NO TOCAMOS LA
-					 * VARIABLE disminuido. */
+					/* ON UNLINK, THE EQUILIBRATION PROCEDURE ALWAYS
+					 * MAKES THE HEIGHT GO DOWN, SO WE DON'T TOUCH
+					 * disminuido VARIABLE. */
 					avl_node_equilibrateLR(q,
 						q->parent
 							? q->parent->left == q
@@ -358,7 +357,7 @@ static struct avl_node *avl_node_unlink(
 							: rt);
 					break;
 				} /* switch */
-				q = q->parent; /* para que apunte al nodo correcto */
+				q = q->parent; /* so we point to the correct node. */
 				break;
 			} /* switch */
 			break;
@@ -371,17 +370,17 @@ static struct avl_node *avl_node_unlink(
 		q = q->parent;
 	} /* while */
 
-	/* si el nodo desligado no es n, eso quiere decir
-	 * que n tenía dos hijos y hemos deligado el nodo
-	 * siguiente o el anterior, debemos ponerlo en lugar
-	 * de n, para poder borrar n. */
+	/* if unlinked node is not n, that means that n had
+	 * both children and we have unlinked the next node
+	 * or the previous, so we have to put it in the place
+	 * n was occupying, so we can erase n. */
 	if (n != res) {
 		if (n->parent) {
 			if (n->parent->left == n)
 				n->parent->left = res;
 			else
 				n->parent->right = res;
-		} else { /* hay que tocar *rt */
+		} else { /* we have to touch *rt */
 			*rt = res;
 		} /* if */
 		if (n->left) n->left->parent = res;
@@ -413,16 +412,15 @@ static void avl_node_equilibrateLL(
 	struct avl_node *l, *r;
 	assert(*rt == n);
 
-	/* LA OPERACIÓN DE REEQUILIBRADO LL SE
-	 * PRODUCE AL INSERTAR EN LA RAMA
-	 * IZQUIERDA EL NODO MARCADO +++.  (EL
-	 * NODO MARCADO xxx NO EXISTE) SE
-	 * PRODUCE UNA DIFERENCIA EN EL NODO n
-	 * DE DOS ALTURAS.
-	 * TAMBIÉN SE PRODUCE AL BORRAR EN LA
-	 * RAMA DERECHA EL NODO MARCADO xxx
-	 * (ENTONCES EXISTE YA EL NODO MARCADO
-	 * +++).
+	/* EQUILIBRATE LL IS CALLED WHEN
+	 * INSERTING ON LEFT LEG OF NODE MARKED
+	 * +++. (NODE MARKED xxx DOESN'T EXIST)
+	 * IT PRODUCES A DIFFERENCE IN NODE n
+	 * OF TWO HEIGHTS.
+	 * IT ALSO GETS CALLED WHEN UNLINKING
+	 * ON RIGHT LEG THE NODE MARKED xxx
+	 * (THEN, YOU HAVE ALREADY THE NODE
+	 * MARKED +++)
 	 *
 	 *                   |
 	 *                +------+           ---
@@ -447,21 +445,21 @@ static void avl_node_equilibrateLL(
 	l = n->left;
 	r = l->right;
 
-	/* primero ajustamos los punteros parent */
+	/* first adjust parent pointers. */
 	l->parent = n->parent;
 	n->parent = l;
 	if (r) r->parent = n;
 
-	/* ahora los punteros descendentes. */
+	/* next, descendant pointers. */
 	n->left = r;
 	l->right = n;
 
-	/* por último, el puntero *rt */
+	/* last, the pointer *rt */
 	*rt = l;
 
-	/* COMO PUEDE VERSE, AL FINAL QUEDA EL
-	 * ÁRBOL EQUILIBRADO, * TANTO EN n, COMO
-	 * EN l. (r NO SE TOCA).
+	/* THIS IS THE SITUATION AFTER EQUILIBRATE
+	 * LL, THE TREE GETS EQUILIBRATED ON n AS
+	 * ON l (r IS NOT TOUCHED).
 	 *
 	 *          |
 	 *       +------+                    ---
@@ -500,15 +498,15 @@ static void avl_node_equilibrateRR(
 	struct avl_node *l, *r;
 	assert(*rt == n);
 
-	/* LA OPERACIÓN DE REEQUILIBRADO RR SE
-	 * PRODUCE AL INSERTAR EN LA RAMA
-	 * DERECHA EL NODO MARCADO +++.  (EL
-	 * NODO MARCADO xxx NO EXISTE) SE
-	 * PRODUCE UNA DIFERENCIA EN n DE DOS
-	 * ALTURAS.  TAMBIÉN SE PRODUCE AL
-	 * BORRAR EN LA RAMA IZQUIERDA EL NODO
-	 * MARCADO xxx (ENTONCES YA EXISTE EL
-	 * NODO MARCADO +++).
+	/* EQUILIBRATE RR IS CALLED WHEN
+	 * INSERTING ON RIGHT LEG OF NODE MARKED
+	 * +++. (NODE MARKED xxx DOESN'T EXIST)
+	 * IT PRODUCES A DIFFERENCE IN NODE n
+	 * OF TWO HEIGHTS.
+	 * IT ALSO GETS CALLED WHEN UNLINKING
+	 * ON RIGHT LEG THE NODE MARKED xxx
+	 * (THEN, YOU HAVE ALREADY THE NODE
+	 * MARKED +++)
 	 *
 	 *              |
 	 *          +------+                 ---
@@ -533,21 +531,21 @@ static void avl_node_equilibrateRR(
 	r = n->right;
 	l = r->left;
 
-	/* PRIMERO AJUSTAMOS LOS PUNTEROS parent. */
+	/* FIRST ADJUST parent POINTERS. */
 	r->parent = n->parent;
 	n->parent = r;
 	if (l) l->parent = n;
 
-	/* AHORA LOS PUNTEROS DESCENDENTES. */
+	/* THEN DESCENDANT POINTERS. */
 	n->right = l;
 	r->left = n;
 
-	/* POR ÚLTIMO, EL PUNTERO rt. */
+	/* FINALLY, POINTER *rt. */
 	*rt = r;
 
-	/* COMO PUEDE VERSE, AL FINAL QUEDA EL
-	 * ÁRBOL EQUILIBRADO, TANTO EN n, COMO
-	 * EN l. (r NO SE TOCA).
+	/* AS CAN BE SEEN, THE TREE GETS
+	 * EQUILIBRATED, EITHER IN n, OR IN l
+	 * (r DOESN'T GET TOUCHED).
 	 *
 	 *                       |
 	 *                   +------+        ---
@@ -584,20 +582,18 @@ static void avl_node_equilibrateLR(
 	struct avl_node *l, *r;
 	assert(*rt == n);
 
-	/* LA SITUACIÓN AHORA ES QUE SE INSERTA
-	 * EL NODO +++ (CUANDO EL NODO xxx NO
-	 * EXISTE) O BIEN SE BORRA EL NODO xxx
-	 * (EXISTIENDO EL NODO +++) (SOLO EXISTE
-	 * O SE INSERTA UNO DE LOS NODOS +++)
-	 * EN ESTE CASO EL NODO r PASA A SER EL
-	 * PADRE DE l Y n, ENLAZÁNDOSE LOS
-	 * SUBÁRBOLES DE r EN LOS BRAZOS DERECHO
-	 * E IZQUIERDO DE l Y n
-	 * (RESPECTIVAMENTE).  EN EL CASO DEL
-	 * BORRADO, ES POSIBLE QUE EXISTAN AMBOS
-	 * NODOS +++, CON LO QUE r ESTARÍA
-	 * EQUILIBRADO Y EL switch DEBE
-	 * CONTEMPLAR LOS TRES CASOS.
+	/* SITUATION NOW IS THAT NODE +++ IS
+	 * INSERTED (WHEN xxx MARKED NODE DOESN'T
+	 * EXIST) OR NODE xxx IS UNLINKED (EXISTING
+	 * NODE +++) (ONLY ONE OF TWO +++ MARKED
+	 * NODES DO EXIST)
+	 * IN THIS CASE, NODE r BECOMES PARENT OF
+	 * l AND n, LINKING SUBTREES OF r IN RIGHT
+	 * AND LEFT LEGS OF l AND n (RESPECTIVELY).
+	 * IN UNLINKING CASE, IT'S POSSIBLE BOTH
+	 * LEGS MARKED +++ EXIST, SO r WOULD BE
+	 * EQUILIBRATED AND switch MUST CHECK FOR
+	 * THAT THREE CASES.
 	 *
 	 *                       |
 	 *                    +------+        ---
@@ -621,37 +617,37 @@ static void avl_node_equilibrateLR(
 	l = n->left;
 	r = l->right;
 
-	/* primero ajustamos los punteros parent: */
+	/* first, adjust the parent pointers: */
 	r->parent = n->parent;
 	l->parent = r;
 	n->parent = r;
 	if (r->left) r->left->parent = l;
 	if (r->right) r->right->parent = n;
 
-	/* ahora los punteros descendentes: */
+	/* then the descendant pointers: */
 	n->left = r->right;
 	l->right = r->left;
 	r->left = l;
 	r->right = n;
 
-	/* ahora los equilibrios */
+	/* finally the equilibriums. */
 	switch(r->equi) {
-	case AVL_LFT: /* nodo insertado por la izquierda de r. */
+	case AVL_LFT: /* node inserted on the left of r. */
 		l->equi = AVL_EQU; n->equi = AVL_RGT;
 		break;
-	case AVL_RGT: /* nodo insertado por la derecha de r. */
+	case AVL_RGT: /* node inserted on the right of r. */
 		l->equi = AVL_LFT; n->equi = AVL_EQU;
 		break;
-	case AVL_EQU: /* nodo borrado y r equilibrado. */
+	case AVL_EQU: /* node unlinked and r equilibrated. */
 		l->equi = AVL_EQU; n->equi = AVL_EQU;
 		break;
 	} /* switch */
 	r->equi = AVL_EQU;
 
-	/* POR ÚLTIMO, AJUSTAMOS *rt */
+	/* lastly, adjust *rt */
 	*rt = r;
 
-	/* LA SITUACIÓN QUEDA COMO SIGUE:
+	/* SCENARIO GETS AS SHOWN:
 	 *
 	 *                   |
 	 *                 +---+              ---
@@ -680,20 +676,18 @@ static void avl_node_equilibrateRL(
 	struct avl_node *r, *l;
 	assert(*rt == n);
 
-	/* LA SITUACIÓN AHORA ES QUE SE INSERTA
-	 * EL NODO +++ (CUANDO EL NODO xxx NO
-	 * EXISTE) O BIEN SE BORRA EL NODO xxx
-	 * (EXISTIENDO EL NODO +++) (SOLO
-	 * EXISTE O SE INSERTA UNO DE LOS NODOS
-	 * +++) EN ESTE CASO EL NODO r PASA A
-	 * SER EL PADRE DE l Y DE n, ENLAZÁNDOSE
-	 * LOS SUBÁRBOLES DE r EN LOS BRAZOS
-	 * DERECHO E IZQUIERDO DE l Y n
-	 * (RESPECTIVAMENTE).  EN EL CASO DEL
-	 * BORRADO, ES POSIBLE QUE EXISTAN AMBOS
-	 * NODOS +++, CON LO QUE l ESTARÍA
-	 * EQUILIBRADO Y EL SWITCH DEBE
-	 * CONTEMPLAR LOS TRES CASOS.
+	/* SITUATION NOW IS THAT NODE +++ IS
+	 * INSERTED (WHEN xxx MARKED NODE DOESN'T
+	 * EXIST) OR NODE xxx IS UNLINKED (EXISTING
+	 * NODE +++) (ONLY ONE OF TWO +++ MARKED
+	 * NODES DO EXIST)
+	 * IN THIS CASE, NODE l BECOMES PARENT OF
+	 * r AND this, LINKING SUBTREES OF l IN RIGHT
+	 * AND LEFT LEGS OF r AND this (RESPECTIVELY).
+	 * IN UNLINKING CASE, IT'S POSSIBLE BOTH
+	 * LEGS MARKED +++ EXIST, SO r WOULD BE
+	 * EQUILIBRATED AND switch MUST CHECK FOR
+	 * THAT THREE CASES.
 	 *
 	 *            |                                    
 	 *        +------+                   ---           
@@ -718,34 +712,34 @@ static void avl_node_equilibrateRL(
 	r = n->right;
 	l = r->left;
 
-	/* PRIMERO AJUSTAMOS LOS PUNTEROS PARENT: */
+	/* FIRST ADJUST parent POINSTERS: */
 	l->parent = n->parent;
 	r->parent = l;
 	n->parent = l;
 	if (l->right) l->right->parent = r;
 	if (l->left) l->left->parent = n;
 
-	/* AHORA LOS PUNTEROS DESCENDENTES */
+	/* THEN DESCENDANT POINTERS */
 	n->right = l->left;
 	r->left = l->right;
 	l->right = r;
 	l->left = n;
 
-	/* AHORA LOS EQUILIBRIOS: */
+	/* NOW, EQUILIBRIUMS: */
 	switch (l->equi) {
-	case AVL_RGT: /* nodo insertado por la derecha de l. */
+	case AVL_RGT: /* node inserted on the right of l. */
 		r->equi = AVL_EQU; n->equi = AVL_LFT; break;
-	case AVL_LFT: /* nodo insertado por la izquierda de l. */
+	case AVL_LFT: /* node inserted on the left of l. */
 		r->equi = AVL_RGT; n->equi = AVL_EQU; break;
-	case AVL_EQU: /* nodo borrado y l equilibrado. */
+	case AVL_EQU: /* node erased and l equilibrated. */
 		r->equi = AVL_EQU; n->equi = AVL_EQU; break;
 	} /* switch */
 	l->equi = AVL_EQU;
 
-	/* POR ÚLTIMO, AJUSTAMOS rt. */
+	/* LAST, ADJUST *rt. */
 	*rt = l;
 
-	/* LA SITUACIÓN QUEDA COMO SIGUE: 
+	/* SCENARIO GETS AS SHOWN: 
 	 *
 	 *                |                      
 	 *              +---+                 ---
@@ -855,7 +849,7 @@ AVL_ITERATOR avl_tree_put(
 	AVL_ITERATOR res;
 
 	if (!t->root) {
-		/* PRIMER NODO EN EL ÁRBOL */
+		/* FIRST NODE IN THE TREE. */
 		t->root = new_avl_node(k, d, NULL, t->fcons);
 		t->sz++; return t->root;
 	} /* if */
@@ -873,30 +867,30 @@ AVL_ITERATOR avl_tree_put(
 	res = p;
 
 	for (crecido = TRUE; crecido && p->parent; p = p->parent) {
-		/* p APUNTA AL NODO QUE ESTAMOS CONSIDERANDO,
-		 * q APUNTA AL PADRE Y
-		 * r APUNTA AL HIJO DERECHO DE p CUANDO p ES HIJO IZQUIERDO
-		 * Y AL HIJO IZQUIERDO DE p CUANDO p ES HIJO DERECHO. */
+		/* p POINTS TO THE TARGET NODE,
+		 * q POINTS TO THE PARENT,
+		 * r POINTS TO THE RIGHT CHILD OF p WHEN p IS A LEFT CHILD,
+		 * AND TO THE LEFT CHILD OF p WHEN p IS A RIGHT CHILD. */
 
 		struct avl_node *q = p->parent;
 
-		if (q->left == p) { /* p es hijo izquierdo de q. */
-			/* ha crecido por la izquierda (p es hijo izquierdo) */
+		if (q->left == p) { /* p is a left child of q. */
+			/* has grown on the left (p is a left child) */
 			switch (q->equi) {
-			case AVL_EQU: /* pequeño desequilibrio a la izq. */
+			case AVL_EQU: /* little deequil. to the left. */
 				q->equi = AVL_LFT; break;
-			case AVL_RGT: /* reequilibrio casual tras la inserción. */
+			case AVL_RGT: /* casual reequil. on insertion. */
 				q->equi = AVL_EQU; crecido = FALSE; break;
-			case AVL_LFT: /* gran desequilibrio a izquierdas. Hay que equilibrar. */
+			case AVL_LFT: /* large deequilib. to the left. Have to equilibrate. */
 				switch(p->equi) {
-				case AVL_LFT: /* crecimiento izquierda-izquierda */
+				case AVL_LFT: /* left-left grow */
 					avl_node_equilibrateLL(q, q->parent
 						? (q->parent->left == q)
 							? &q->parent->left
 							: &q->parent->right
 						: &t->root);
 					break;
-				case AVL_RGT: /* crecimiento izquierda-derecha */
+				case AVL_RGT: /* left-right grow */
 					avl_node_equilibrateLR(q, q->parent
 						? (q->parent->left == q)
 							? &q->parent->left
@@ -904,26 +898,26 @@ AVL_ITERATOR avl_tree_put(
 						: &t->root);
 					break;
 				} /* switch */
-				crecido = FALSE; /* el árbol no ha crecido a partir de aquí. */
+				crecido = FALSE; /* tree has not grown in this case. */
 				break;
 			} /* switch */
 		} else { /* q->right == p */
-			/* creció por la derecha (p es hijo derecho) */
+			/* p is a right child. Grown on the right. */
 			switch (q->equi) {
-			case AVL_EQU: /* pequeño desequilibrio a la derecha. */
+			case AVL_EQU: /* little deequilib. to the right */
 				q->equi = AVL_RGT; break;
-			case AVL_LFT: /* reequilibrio casual tras la inserción. */
+			case AVL_LFT: /* casual reequilib. after the insertion. */
 				q->equi = AVL_EQU; crecido = FALSE; break;
-			case AVL_RGT: /* gran desequilibrio a derechas.  Hay que reequilibrar. */
+			case AVL_RGT: /* large deequilib. after insertion, have to reequilibrate */
 				switch(p->equi) {
-				case AVL_RGT: /* crecimiento derecha-derecha */
+				case AVL_RGT: /* right-right grow. */
 					avl_node_equilibrateRR(q, q->parent
 						? (q->parent->right == q)
 							? &q->parent->right
 							: &q->parent->left
 						: &t->root);
 					break;
-				case AVL_LFT: /* crecimiento derecha-izquierda */
+				case AVL_LFT: /* right-left grow. */
 					avl_node_equilibrateRL(q, q->parent
 						? (q->parent->right == q)
 							? &q->parent->right
@@ -931,7 +925,7 @@ AVL_ITERATOR avl_tree_put(
 						: &t->root);
 					break;
 				} /* switch */
-				crecido = FALSE; /* el árbol no ha crecido a partir de aquí */
+				crecido = FALSE; /* tree hasn't grow from here on. */
 				break;
 			} /* switch */
 		} /* if */
@@ -946,9 +940,9 @@ int avl_tree_del(AVL_TREE t, const void *k)
 
 	if (!t->root) return FALSE;
 	p = avl_node_search(t->root, k, t->fcomp, &e);
-	if (e != AVL_EQU) return FALSE; /* no existe, no borramos nada. */
+	if (e != AVL_EQU) return FALSE; /* doesn't exist, we dont erase anything. */
 
-	p = avl_node_unlink(p, &t->root); /* lo desligamos y lo borramos. */
+	p = avl_node_unlink(p, &t->root); /* unlink and erase. */
 	free_avl_node(p, t->fdest);
 	t->sz--;
 
@@ -1082,8 +1076,9 @@ static void avl_node_printL(
 	strcpy(pr_buf + pr_n, prf);
 	pr_n += strlen(prf);
 
-	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
-	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
+	/* WE HAVE USED UTF-8 STRINGS TO REPRESENT
+	 * THE TREE AND ITS LEGS. */
+	/* RECURSIVE CALL FOR THE RIGHT SIDE */
 	if (n->right) avl_node_printR(n->right, o, "\xe2\x94\x82", pf);
 	avl_node_printNode(n, o, n->right
 		? (n->left
@@ -1092,7 +1087,7 @@ static void avl_node_printL(
 		: (n->left
 			? "\xe2\x94\x94\xe2\x94\xac"
 			: "\xe2\x94\x94\xe2\x94\x80"), pf);
-	/* llamada recursiva del lado izquierdo */
+	/* RECURSIVE CALL FOR THE LEFT SIDE. */
 	if (n->left) avl_node_printL(n->left, o, " ", pf);
 	pr_n = l;
 	pr_buf[l] = '\0';
@@ -1107,8 +1102,9 @@ static void avl_node_printR(
 	strcpy(pr_buf + pr_n, prf);
 	pr_n += strlen(prf);
 
-	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
-	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
+	/* WE HAVE USED UTF-8 STRINGS TO REPRESENT
+	 * THE TREE AND ITS LEGS. */
+	/* RECURSIVE CALL FOR THE RIGHT SIDE */
 	if (n->right) avl_node_printR(n->right, o, " ", pf);
 	avl_node_printNode(n, o, n->right
 		? (n->left
@@ -1117,7 +1113,7 @@ static void avl_node_printR(
 		: (n->left
 			? "\xe2\x94\x8c\xe2\x94\xac"
 			: "\xe2\x94\x8c\xe2\x94\x80"), pf);
-	/* llamada recursiva del lado izquierdo */
+	/* RECURSIVE CALL FOR THE LEFT SIDE. */
 	if (n->left)
 		avl_node_printL(n->left, o,
 			"\xe2\x94\x82", pf);
@@ -1127,8 +1123,9 @@ static void avl_node_printR(
 
 static void avl_node_print(struct avl_node *n, FILE *o, AVL_FPRNT pf)
 {
-	/* SE HA RECURRIDO A CADENAS CON CARACTERES UTF-8
-	 * PARA REPRESENTAR EL ÁRBOL Y SUS RAMAS. */
+	/* WE HAVE USED UTF-8 STRINGS TO REPRESENT
+	 * THE TREE AND ITS LEGS. */
+	/* CALL FOR THE RIGHT SIDE */
 	if (n->right) avl_node_printR(n->right, o, "", pf);
 	avl_node_printNode(n, o, n->right
 		? (n->left
@@ -1137,6 +1134,7 @@ static void avl_node_print(struct avl_node *n, FILE *o, AVL_FPRNT pf)
 		: (n->left
 			? "\xe2\x94\xac"
 			: "\xe2\x94\x80"), pf);
+	/* RECURSIVE CALL FOR THE LEFT SIDE. */
 	if (n->left) avl_node_printL(n->left, o, "", pf);
 } /* avl_node_print */
 
