@@ -18,10 +18,13 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include "avlP.h"
+
+#define PAGESIZE	4096U
+#define N_NODES	((PAGESIZE)/sizeof(union avl_node_alloc))
 
 /* Standard include files */
 
@@ -39,6 +42,11 @@ static char *avl_equ2str(avl_equ equ)
 	} /* switch */
 } /* avl_equ2str */
 
+static union avl_node_alloc {
+	struct avl_node node;
+	union avl_node_alloc *next;
+} *freeList = NULL;
+
 static struct avl_node *new_avl_node(
 	const void *key,
 	void *data,
@@ -46,7 +54,24 @@ static struct avl_node *new_avl_node(
 	AVL_FCONS fc)
 {
 	struct avl_node *res;
-	assert(res = malloc(sizeof (struct avl_node)));
+
+	if (!freeList) {
+		int i;
+		union avl_node_alloc *p;
+
+		DEB((PR("CALLOC(N_NODES(%lu), "
+			"sizeof(union avl_node_alloc)(%lu))"
+			" -> MALLOC(PAGESIZE(%u))\n"),
+			N_NODES, sizeof(union avl_node_alloc), PAGESIZE));
+		assert(freeList = malloc(PAGESIZE));
+		for (i = 0, p = freeList; i < N_NODES-1; i++)
+			freeList[i].next = ++p;
+		freeList[i].next = NULL;
+	} /* if */
+
+	/* unlink from the free list */
+	res = &freeList->node;
+	freeList = freeList->next;
 
 	res->parent = prnt;
 	res->left = NULL;
@@ -60,11 +85,15 @@ static struct avl_node *new_avl_node(
 static void free_avl_node(struct avl_node *n, AVL_FDEST fd)
 {
 	if (n) {
+		union avl_node_alloc *p = (union avl_node_alloc *) n;
 		if (n->left) free_avl_node(n->left, fd);
 		if (n->right) free_avl_node(n->right, fd);
 		DEB(("free_avl_node: deleting %p\n", n));
 		if (fd) fd(n->key);
-		free(n);
+
+		/* return to the free list */
+		p->next = freeList;
+		freeList = p;
 	} /* if */
 } /* free_avl_node */
 
@@ -73,7 +102,7 @@ static struct avl_node *avl_node_root(struct avl_node *n)
 	struct avl_node *res;
 
 	for (res = n; res->parent; res = res->parent)
-		; /* OJO: cuerpo intencionadamente vacío */
+		; /* WARNING: intentionally empty body */
 	return res;
 } /* avl_node_root */
 
@@ -82,7 +111,7 @@ static struct avl_node *avl_node_first(struct avl_node *n)
 	struct avl_node *res;
 
 	for (res = n; res->left; res = res->left)
-		; /* OJO: cuerpo intencionadamente vacío */
+		; /* WARNING: intentionally empty body */
 	return res;
 } /* avl_node_first */
 
@@ -91,7 +120,7 @@ static struct avl_node *avl_node_last(struct avl_node *n)
 	struct avl_node *res;
 
 	for (res = n; res->right; res = res->right)
-		; /* OJO: cuerpo intencionadamente vacío */
+		; /* WARNING: intentionally empty body */
 	return res;
 } /* avl_node_last */
 
@@ -120,7 +149,7 @@ static struct avl_node *avl_node_search(
 	if (!n) return NULL;
 
 	for (;;) {
-		int cmp = fc(k, p->key); /* comparamos */
+		int cmp = fc(k, p->key); /* compare */
 
 		if (cmp == 0) { /* k == p->key */
 			if (e) *e = AVL_EQU;
@@ -147,9 +176,9 @@ static struct avl_node *avl_node_unlink(
 	char e, disminuido;
 	struct avl_node *res;
 
-	/* SI TIENE AMBOS HIJOS... DESLIGAMOS EL SIGUIENTE O EL
-	 * ANTERIOR, Y LUEGO LO COLOCAMOS AQUÍ (EN LUGAR DE
-	 * ESTE NODO). */
+	/* IF IT HAS BOTH CHILDREN... UNLINK THE NEXT OR THE
+	 * PREVIOUS, AND THEN PUT IT HERE (INSTEAD OF THIS
+	 * NODE) */
 	if (p->left && p->right) {
 		switch(p->equi) {
 		case AVL_EQU:
