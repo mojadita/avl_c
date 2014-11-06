@@ -70,7 +70,7 @@ AVL_TREE new_avl_tree(
 	AVL_FCONS fC, /* key constructor function, see above. */
 	AVL_FDEST fD, /* key destructor function, see above. */
 	AVL_FPRNT fP
-); /* Tested Mon Apr  9 10:34:05 CEST 2012 OK*/
+); /* Tested Mon Apr  9 10:34:05 CEST 2012 OK, UT OK. */
 
 /* AVL_TREE destructor. Call this function when you don't need anymore the
  * AVL_TREE you got in the new_avl_tree() function.  It deallocates all

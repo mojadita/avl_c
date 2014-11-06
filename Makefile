@@ -16,10 +16,13 @@ avl_lib			= $(avl_soname).$(MINOR)
 avl_lib_targets = $(avl_lib) $(avl_soname) $(avl_lib_dev)
 
 targets = $(avl_lib_targets) tstavl tstavl2 tstavl3
+ut_targets = ut_avl
+ut_libs = -lgmock -lgmock_main -lgtest -lpthread
 
-.PHONY: all clean
+.PHONY: all clean ut
 
 all: $(targets)
+ut: $(ut_targets)
 clean:
 	$(RM) $(targets) $(tstavl_objs)
 install: $(targets)
@@ -48,5 +51,10 @@ tstavl3: $(tstavl3_objs) Makefile
 
 tstavl3.o avl.o: avlP.h
 avl.o tstavl.o tstavl2.o tstavl3.o: avl.h Makefile
+
+ut_avl_objs = ut_avl.o libavl.so
+
+ut_avl: $(ut_avl_objs)
+	$(CXX) $(LDFLAGS) -o $@ $(ut_avl_objs) $(ut_libs)
 
 # $Id: Makefile,v 1.5 2014/08/08 19:25:50 luis Exp $
