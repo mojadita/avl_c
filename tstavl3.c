@@ -9,8 +9,6 @@
 
 #include "avlP.h"
 
-#define PR(X) __FILE__":%d:%s: " X, __LINE__, __func__
-
 #define P(X) printf(PR("%s = %lu\n"), #X, X)
 
 int main()

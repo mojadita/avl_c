@@ -14,14 +14,22 @@ avl_lib_dev		= libavl.so
 avl_soname		= $(avl_lib_dev).$(MAJOR)
 avl_lib			= $(avl_soname).$(MINOR)
 avl_lib_targets = $(avl_lib) $(avl_soname) $(avl_lib_dev)
+avl_lib_objs	= avl.so crc.so crc32ieee8023.so
 
 targets = $(avl_lib_targets) tstavl tstavl2 tstavl3
 
 .PHONY: all clean
+.SUFFIXES: .c .o .so
+
+
+.c.o:
+	$(CC) $(CFLAGS) -c -o $@ $<
+.c.so:
+	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 
 all: $(targets)
 clean:
-	$(RM) $(targets) $(tstavl_objs)
+	$(RM) $(targets) $(tstavl_objs) $(tstavl2_objs) $(tstavl3_objs) $(avl_lib_objs)
 install: $(targets)
 	ln -f $(avl_lib_targets) $(prefix)/lib
 	ln -f avl.h $(prefix)/include
@@ -30,8 +38,8 @@ $(avl_lib_dev): $(avl_soname) Makefile
 	ln -sf $< $@
 $(avl_soname): $(avl_lib) Makefile
 	ln -sf $< $@
-$(avl_lib): avl.c avl.h Makefile
-	$(CC) $(CFLAGS) -o $@ -fPIC -shared -Wl,-soname=$(avl_soname) $<
+$(avl_lib): $(avl_lib_objs) avl.h Makefile
+	$(CC) $(CFLAGS) -o $@ -fPIC -shared -Wl,-soname=$(avl_soname) $(avl_lib_objs)
 
 tstavl_objs = tstavl.o stravl.o $(avl_lib)
 
@@ -48,5 +56,9 @@ tstavl3: $(tstavl3_objs) Makefile
 
 tstavl3.o avl.o: avlP.h
 avl.o tstavl.o tstavl2.o tstavl3.o: avl.h Makefile
+
+avl.so: crc.h crc32ieee8023.h
+crc.so: crc.h
+crc32ieee8023.so: crc32ieee8023.h
 
 # $Id: Makefile,v 1.5 2014/08/08 19:25:50 luis Exp $

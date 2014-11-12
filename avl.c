@@ -26,6 +26,19 @@
 #define PAGESIZE	4096U
 #define N_NODES	((PAGESIZE)/sizeof(union avl_node_alloc))
 
+#define CRC_INITIAL	0
+
+#define ADDCRC(p) do { \
+		add_crc(CRC_INITIAL, \
+		(CRC_BYTE *)(p), sizeof(*(p)) - sizeof(CRC_STATE), \
+		crc32ieee8023); \
+	} while (0)
+#define CRC(p) \
+	do_crc(CRC_INITIAL, \
+	(CRC_BYTE *)(p), sizeof(*(p)), \
+	crc32ieee8023)
+
+#define BADCRC	" \033[1;36;44mBADCRC\033[0m"
 /* Standard include files */
 
 /* variables */
@@ -73,12 +86,14 @@ static struct avl_node *new_avl_node(
 	res = &freeList->node;
 	freeList = freeList->next;
 
+	/* now initialize */
 	res->parent = prnt;
 	res->left = NULL;
 	res->right = NULL;
 	res->equi = AVL_EQU;
 	res->key = fc ? fc(key) : key;
 	res->data = data;
+	ADDCRC(res);
 	return res;
 } /* new_avl_node */
 
@@ -94,6 +109,8 @@ static void free_avl_node(struct avl_node *n, AVL_FDEST fd)
 		/* return to the free list */
 		p->next = freeList;
 		freeList = p;
+		/* now calculate CRC */
+		ADDCRC(p);
 	} /* if */
 } /* free_avl_node */
 
@@ -199,16 +216,26 @@ static struct avl_node *avl_node_unlink(
 	if (q) { /* we have a parent. */
 		if (q->left == p) { /* it is left child */
 			q->left = p->left ? p->left : p->right;
-			if (q->left) q->left->parent = q;
+			if (q->left) {
+				q->left->parent = q;
+				ADDCRC(q->left);
+			} /* if */
 			e = AVL_LFT;
 		} else { /* q->right == p, it is right child */
 			q->right = p->right ? p->right : p->left;
-			if (q->right) q->right->parent = q;
+			if (q->right) {
+				q->right->parent = q;
+				ADDCRC(q->right);
+			} /* if */
 			e = AVL_RGT;
 		} /* if */
+		ADDCRC(q);
 	} else { /* no parent, we have to touch *rt. */
 		*rt = p->left ? p->left : p->right;
-		if (*rt) (*rt)->parent = NULL;
+		if (*rt) {
+			(*rt)->parent = NULL;
+			ADDCRC(*rt);
+		} /* if */
 		p = *rt;
 		e = AVL_EQU;
 	} /* if */
@@ -221,7 +248,7 @@ static struct avl_node *avl_node_unlink(
 	 * WHILE THE TREE HEIGHT HAS DECREASED, WE HAVE TO FIND A NODE
 	 * THAT EQUILIBRATES OR ONE THAT DEEQUILIBRATES TOO MUCH. */
 	disminuido = TRUE;
-	while (disminuido && q) {
+	for (disminuido = TRUE; disminuido && q; q = q->parent) {
 		switch (e) {
 		case AVL_LFT: /* we lose height on the left */
 			switch (q->equi) {
@@ -299,8 +326,10 @@ static struct avl_node *avl_node_unlink(
 				? AVL_LFT
 				: AVL_RGT
 			: AVL_EQU;
-		q = q->parent;
-	} /* while */
+		ADDCRC(q);
+	} /* for */
+
+	if (q) ADDCRC(q);
 
 	/* if unlinked node is not n, that means that n had
 	 * both children and we have unlinked the next node
@@ -312,15 +341,23 @@ static struct avl_node *avl_node_unlink(
 				n->parent->left = res;
 			else
 				n->parent->right = res;
+			ADDCRC(n->parent);
 		} else { /* we have to touch *rt */
 			*rt = res;
 		} /* if */
-		if (n->left) n->left->parent = res;
-		if (n->right) n->right->parent = res;
+		if (n->left) {
+			n->left->parent = res;
+			ADDCRC(n->left);
+		} /* if */
+		if (n->right) {
+			n->right->parent = res;
+			ADDCRC(n->right);
+		} /* if */
 		res->parent = n->parent;
 		res->left = n->left;
 		res->right = n->right;
 		res->equi = n->equi;
+		ADDCRC(res);
 		n->parent = n->left = n->right = NULL;
 	} /* if */
 
@@ -420,7 +457,8 @@ static void avl_node_equilibrateLL(
 		l->equi = AVL_EQU; n->equi = AVL_EQU;
 		break;
 	} /* switch */
-
+	ADDCRC(n);
+	if (r) ADDCRC(r);
 } /* avl_node_equilibrateLL */
 
 static void avl_node_equilibrateRR(
@@ -504,7 +542,8 @@ static void avl_node_equilibrateRR(
 	case AVL_RGT:
 		r->equi = AVL_EQU; n->equi = AVL_EQU; break;
 	} /* switch */
-
+	ADDCRC(n);
+	if (l) ADDCRC(l);
 } /* avl_node_equilibrateRR */
 
 static void avl_node_equilibrateLR(
@@ -599,6 +638,12 @@ static void avl_node_equilibrateLR(
 	 *                             |xxx|     
 	 *                             +---+  ---
 	 */
+	ADDCRC(l);
+	ADDCRC(n);
+	/* These must be generated as the parent
+	 * pointers are modified */
+	if (l->right) ADDCRC(l->right);
+	if (n->left) ADDCRC(l->left);
 } /* avl_node_equilibrateLR */
 
 static void avl_node_equilibrateRL(
@@ -691,6 +736,10 @@ static void avl_node_equilibrateRL(
 	 *  |xxx|                                
 	 *  +---+                             ---
 	 */
+	ADDCRC(r);
+	ADDCRC(n);
+	if (n->right) ADDCRC(n->right);
+	if (r->left) ADDCRC(r->left);
 } /* avl_node_equilibrateRL */
 
 AVL_TREE new_avl_tree(AVL_FCOMP fc, AVL_FCONS fC, AVL_FDEST fD, AVL_FPRNT fP)
@@ -703,6 +752,7 @@ AVL_TREE new_avl_tree(AVL_FCOMP fc, AVL_FCONS fC, AVL_FDEST fD, AVL_FPRNT fP)
 	res->fcons = fC;
 	res->fdest = fD;
 	res->fprnt = fP;
+	ADDCRC(res);
 	return res;
 } /* new_avl_tree */
 
@@ -711,6 +761,7 @@ void avl_tree_clear(AVL_TREE t)
 	free_avl_node(t->root, t->fdest);
 	t->root = NULL;
 	t->sz = 0;
+	ADDCRC(t);
 } /* avl_tree_clear */
 
 void free_avl_tree(AVL_TREE t)
@@ -777,25 +828,31 @@ AVL_ITERATOR avl_tree_put(
 {
 	avl_equ e;
 	int crecido;
+	int old_sz = t->sz;
+	struct avl_node *old_root = t->root;
 	struct avl_node *p;
 	AVL_ITERATOR res;
 
 	if (!t->root) {
 		/* FIRST NODE IN THE TREE. */
 		t->root = new_avl_node(k, d, NULL, t->fcons);
-		t->sz++; return t->root;
+		ADDCRC(t->root);
+		t->sz++;
+		ADDCRC(t);
+		return t->root;
 	} /* if */
 
 	p = avl_node_search(t->root, k, t->fcomp, &e);
 
 	switch(e) {
-	case AVL_EQU: p->data = d; return p;
+	case AVL_EQU: p->data = d; ADDCRC(p); return p;
 	case AVL_LFT: p->left = new_avl_node(k, d, p, t->fcons);
-		t->sz++; p = p->left; break;
+		p = p->left; break;
 	case AVL_RGT: p->right = new_avl_node(k, d, p, t->fcons);
-		t->sz++; p = p->right; break;
+		p = p->right; break;
 	} /* switch */
 
+	t->sz++; 
 	res = p;
 
 	for (crecido = TRUE; crecido && p->parent; p = p->parent) {
@@ -809,10 +866,8 @@ AVL_ITERATOR avl_tree_put(
 		if (q->left == p) { /* p is a left child of q. */
 			/* has grown on the left (p is a left child) */
 			switch (q->equi) {
-			case AVL_EQU: /* little deequil. to the left. */
-				q->equi = AVL_LFT; break;
-			case AVL_RGT: /* casual reequil. on insertion. */
-				q->equi = AVL_EQU; crecido = FALSE; break;
+			case AVL_EQU: q->equi = AVL_LFT; break;
+			case AVL_RGT: q->equi = AVL_EQU; crecido = FALSE; break;
 			case AVL_LFT: /* large deequilib. to the left. Have to equilibrate. */
 				switch(p->equi) {
 				case AVL_LFT: /* left-left grow */
@@ -830,6 +885,7 @@ AVL_ITERATOR avl_tree_put(
 						: &t->root);
 					break;
 				} /* switch */
+				q = q->parent; /* so q points to the proper node */
 				crecido = FALSE; /* tree has not grown in this case. */
 				break;
 			} /* switch */
@@ -857,11 +913,17 @@ AVL_ITERATOR avl_tree_put(
 						: &t->root);
 					break;
 				} /* switch */
+				q = q->parent; /* so q points to the proper node */
 				crecido = FALSE; /* tree hasn't grow from here on. */
 				break;
 			} /* switch */
 		} /* if */
+		ADDCRC(q);
 	} /* for */
+
+	if (p) ADDCRC(p);
+
+	ADDCRC(t);
 	return res;
 } /* avl_tree_put */
 
@@ -877,6 +939,7 @@ int avl_tree_del(AVL_TREE t, const void *k)
 	p = avl_node_unlink(p, &t->root); /* unlink and erase. */
 	free_avl_node(p, t->fdest);
 	t->sz--;
+	ADDCRC(t);
 
 	return TRUE;
 } /* avl_tree_del */
@@ -892,6 +955,7 @@ int avl_iterator_del(
 	p = avl_node_unlink(i, &t->root);
 	free_avl_node(p, t->fdest);
 	t->sz--;
+	ADDCRC(t);
 	return TRUE;
 } /* avl_iterator_del */
 
@@ -977,9 +1041,12 @@ static int avl_node_printNode(
 	res += fprintf(o,
 		"];"
 		" e=%s;"
-		" l=%d;",
+		" l=%d;"
+		" crc=0x%08x%s",
 		avl_equ2str(n->equi),
-		avl_node_level(n));
+		avl_node_level(n),
+		n->crc,
+		CRC(n) ? BADCRC : "");
 #if PRINT_ALL
 	res += fprintf(o,
 		" ptr=%p;"
@@ -1072,6 +1139,7 @@ static void avl_node_print(struct avl_node *n, FILE *o, AVL_FPRNT pf)
 
 void avl_tree_print(AVL_TREE t, FILE *o)
 {
+	fprintf(o, "TREE: crc=0x%08x%s\n", t->crc, CRC(t) ? BADCRC : "");
 	if (t->root)
 	avl_node_print(t->root, o, t->fprnt);
 } /* avl_tree_print */
