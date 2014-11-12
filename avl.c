@@ -30,9 +30,10 @@
 
 #define ADDCRC(p) do { \
 		add_crc(CRC_INITIAL, \
-		(CRC_BYTE *)(p), sizeof(*(p)) - sizeof(CRC_STATE), \
+		(CRC_BYTE *)(p), sizeof(*(p)), \
 		crc32ieee8023); \
 	} while (0)
+
 #define CRC(p) \
 	do_crc(CRC_INITIAL, \
 	(CRC_BYTE *)(p), sizeof(*(p)), \
@@ -1139,7 +1140,9 @@ static void avl_node_print(struct avl_node *n, FILE *o, AVL_FPRNT pf)
 
 void avl_tree_print(AVL_TREE t, FILE *o)
 {
-	fprintf(o, "TREE: crc=0x%08x%s\n", t->crc, CRC(t) ? BADCRC : "");
+	fprintbuf(o,
+		sizeof(*t), t,
+		"TREE: crc=0x%08x%s", t->crc, CRC(t) ? BADCRC : "");
 	if (t->root)
 	avl_node_print(t->root, o, t->fprnt);
 } /* avl_tree_print */

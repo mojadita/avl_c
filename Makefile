@@ -41,12 +41,12 @@ $(avl_soname): $(avl_lib) Makefile
 $(avl_lib): $(avl_lib_objs) avl.h Makefile
 	$(CC) $(CFLAGS) -o $@ -fPIC -shared -Wl,-soname=$(avl_soname) $(avl_lib_objs)
 
-tstavl_objs = tstavl.o stravl.o $(avl_lib)
+tstavl_objs = tstavl.o stravl.o fprintbuf.o $(avl_lib)
 
 tstavl: $(tstavl_objs) Makefile
 	$(CC) $(LDFLAGS) -o tstavl $(tstavl_objs)
 
-tstavl2_objs = tstavl2.o intavl.o $(avl_lib)
+tstavl2_objs = tstavl2.o intavl.o fprintbuf.o $(avl_lib)
 tstavl2: $(tstavl2_objs) Makefile
 	$(CC) $(LDFLAGS) -o tstavl2 $(tstavl2_objs)
 
