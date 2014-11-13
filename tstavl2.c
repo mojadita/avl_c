@@ -47,17 +47,19 @@ int main (int argc, char **argv)
 	help();
 
 	for (i = 0; i < N; i++) {
-		intavl_tree_put(t, rand(), (void *)i);
+		int d = rand();
+		intavl_tree_print(t, stdout);
+		printf("adding %d\n", d);
+		intavl_tree_put(t, d, (void *)i);
+		if (avl_tree_chk(t)) break;
 	}
 
+	intavl_tree_print(t, stdout);
 #if 0
 	for (p = intavl_tree_first(t); p; p = intavl_iterator_next(p)) {
 		printf("[%d]->%d\n", intavl_iterator_key(p), intavl_iterator_data(p));
 	}
 #endif
-	intavl_tree_print(t, stdout);
-
-	printf("size = %d\n", avl_tree_size(t));
 
 	return 0;
 } /* main */

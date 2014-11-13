@@ -191,6 +191,11 @@ void avl_iterator_set_data(
 	void *d /* data pointer to set */
 );
 
+/* This function returns the number of failed CRCs in a tree. */
+int avl_tree_chk(
+	AVL_TREE t /* the tree to check */
+);
+
 #endif /* AVL_H */
 /* Do not include anything AFTER the line above, as it would not be
  * protected against double inclusion from other files.  */

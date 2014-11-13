@@ -8,6 +8,8 @@
 #define _AVLP_H
 
 #include "avl.h"
+#include "crc.h"
+#include "crc32ieee8023.h"
 
 /* constants */
 #ifndef DEBUG
@@ -49,6 +51,7 @@ struct avl_node {
 	struct avl_node		*right;
 	const void			*key;
 	void				*data;
+	CRC_STATE			crc;
 };
 
 struct avl_tree {
@@ -58,6 +61,7 @@ struct avl_tree {
 	AVL_FCONS			fcons;
 	AVL_FDEST			fdest;
 	AVL_FPRNT			fprnt;
+	CRC_STATE			crc;
 };
 
 /* private prototypes */
@@ -107,6 +111,8 @@ static void avl_node_printR(
 static void avl_node_print(
 	struct avl_node *n,
 	FILE *o, AVL_FPRNT fp);
+static int avl_node_chk(
+	struct avl_node *n);
 
 #endif /* _AVLP_H */
 /* avlP.h */
