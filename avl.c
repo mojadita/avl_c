@@ -28,6 +28,7 @@
 
 #define CRC_INITIAL	0
 
+#if USE_CRC
 #define ADDCRC(p) do { \
 		add_crc(CRC_INITIAL, \
 		(CRC_BYTE *)(p), sizeof(*(p)), \
@@ -38,6 +39,10 @@
 	do_crc(CRC_INITIAL, \
 	(CRC_BYTE *)(p), sizeof(*(p)), \
 	crc32ieee8023)
+#else /* USE_CRC */
+#define ADDCRC(p) do { p; } while(0)
+#define CRC(p) (0)
+#endif
 
 #define BADCRC	" \033[1;33;41mBADCRC\033[0m"
 /* Standard include files */
@@ -77,7 +82,9 @@ static struct avl_node *new_avl_node(
 		DEB((PR("CALLOC(N_NODES(%lu), "
 			"sizeof(union avl_node_alloc)(%lu))"
 			" -> MALLOC(PAGESIZE(%u))\n"),
-			N_NODES, sizeof(union avl_node_alloc), PAGESIZE));
+			N_NODES,
+			sizeof(union avl_node_alloc),
+			PAGESIZE));
 		assert(freeList = malloc(PAGESIZE));
 		for (i = 0, p = freeList; i < N_NODES-1; i++)
 			freeList[i].next = ++p;
@@ -121,7 +128,7 @@ static struct avl_node *avl_node_root(struct avl_node *n)
 	struct avl_node *res;
 
 	for (res = n; res->parent; res = res->parent)
-		; /* WARNING: intentionally empty body */
+		continue;
 	return res;
 } /* avl_node_root */
 
@@ -130,7 +137,7 @@ static struct avl_node *avl_node_first(struct avl_node *n)
 	struct avl_node *res;
 
 	for (res = n; res->left; res = res->left)
-		; /* WARNING: intentionally empty body */
+		continue;
 	return res;
 } /* avl_node_first */
 
@@ -139,7 +146,7 @@ static struct avl_node *avl_node_last(struct avl_node *n)
 	struct avl_node *res;
 
 	for (res = n; res->right; res = res->right)
-		; /* WARNING: intentionally empty body */
+		continue;
 	return res;
 } /* avl_node_last */
 
@@ -170,20 +177,19 @@ static struct avl_node *avl_node_search(
 	for (;;) {
 		int cmp = fc(k, p->key); /* compare */
 
-		if (cmp == 0) { /* k == p->key */
-			if (e) *e = AVL_EQU;
-			return p;
-		} /* if */
-		if (cmp < 0) { /* k < p->key */
-			if (e) *e = AVL_LFT;
-			if (!p->left) break;
-			p = p->left;
-		} else { /* k > p->key */
+		if (cmp > 0) { /* k > p->key */
 			if (e) *e = AVL_RGT;
 			if (!p->right) break;
 			p = p->right;
+		} else if (cmp < 0) { /* k < p->key */
+			if (e) *e = AVL_LFT;
+			if (!p->left) break;
+			p = p->left;
+		} else { /* k == p->key */
+			if (e) *e = AVL_EQU;
+			return p;
 		} /* if */
-	} /* for (;;) */
+	} /* for */
 	return p;
 } /* avl_node_search */
 
@@ -645,7 +651,7 @@ static void avl_node_equilibrateLR(
 	/* These must be generated as the parent
 	 * pointers are modified */
 	if (l->right) ADDCRC(l->right);
-	if (n->left) ADDCRC(l->left);
+	if (n->left) ADDCRC(n->left);
 } /* avl_node_equilibrateLR */
 
 static void avl_node_equilibrateRL(
@@ -1039,11 +1045,16 @@ static int avl_node_printNode(
 		"];"
 		" e=%s;"
 		" l=%d;"
-		" crc=0x%08x%s",
-		avl_equ2str(n->equi),
-		avl_node_level(n),
-		n->crc,
-		CRC(n) ? BADCRC : "");
+#if USE_CRC
+		" crc=0x%08x%s"
+#endif
+		, avl_equ2str(n->equi),
+		avl_node_level(n)
+#if USE_CRC
+		, n->crc,
+		CRC(n) ? BADCRC : ""
+#endif
+		);
 #if PRINT_ALL
 	res += fprintf(o,
 		" ptr=%p;"
@@ -1138,13 +1149,24 @@ void avl_tree_print(AVL_TREE t, FILE *o)
 {
 	fprintbuf(o,
 		sizeof(*t), t,
-		PR("TREE: crc=0x%08x%s"), t->crc, CRC(t) ? BADCRC : "");
+		PR("TREE: "
+#if USE_CRC
+		"crc=0x%08x%s"
+#endif
+		)
+#if USE_CRC
+		, t->crc, CRC(t) ? BADCRC : ""
+#endif
+		);
 	if (t->root)
 		avl_node_print(t->root, o, t->fprnt);
+#if USE_CRC
 	fprintf(o, PR("TREE: bad crcs = %d/%d\n"),
 		avl_tree_chk(t), avl_tree_size(t));
+#endif
 } /* avl_tree_print */
 
+#if USE_CRC
 static int avl_node_chk(
 	struct avl_node *n)
 {
@@ -1154,13 +1176,16 @@ static int avl_node_chk(
 	if (n->right) res += avl_node_chk(n->right);
 	return res;
 } /* avl_node_chk */
+#endif
 
 int avl_tree_chk(
 	AVL_TREE t)
 {
 	int res = 0;
+#if USE_CRC
 	if (CRC(t)) res++;
 	if (t->root) res += avl_node_chk(t->root);
+#endif
 	return res;
 } /* avl_tree_chk */
 	

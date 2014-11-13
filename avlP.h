@@ -13,7 +13,11 @@
 
 /* constants */
 #ifndef DEBUG
-#define DEBUG 			0
+#define DEBUG 			(0)
+#endif
+
+#ifndef USE_CRC
+#define USE_CRC			(DEBUG)
 #endif
 
 #ifdef DEB
@@ -28,11 +32,11 @@
 #endif
 
 #ifndef PRINT_ALL
-#define PRINT_ALL		0
+#define PRINT_ALL		(DEBUG)
 #endif
 
 #ifndef FALSE
-#define FALSE 			0
+#define FALSE 			(0)
 #define TRUE			(!FALSE)
 #endif
 
@@ -51,7 +55,9 @@ struct avl_node {
 	struct avl_node		*right;
 	const void			*key;
 	void				*data;
-	CRC_STATE			crc;
+#if USE_CRC
+	CRC_STATE			crc; /* must be the last field */
+#endif
 };
 
 struct avl_tree {
@@ -61,7 +67,9 @@ struct avl_tree {
 	AVL_FCONS			fcons;
 	AVL_FDEST			fdest;
 	AVL_FPRNT			fprnt;
-	CRC_STATE			crc;
+#if USE_CRC
+	CRC_STATE			crc; /* must be the last field */
+#endif
 };
 
 /* private prototypes */

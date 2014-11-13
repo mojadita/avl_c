@@ -15,6 +15,7 @@
 #define IN_TSTAVL_C
 
 /* Standard include files */
+#include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
@@ -42,17 +43,24 @@ int main (int argc, char **argv)
 	AVL_TREE t = new_intavl_tree();
 	int i;
 	AVL_ITERATOR p;
+	struct timeval t0, t1;
 
+#if 0
 	srand(time(NULL));
+#endif
 	help();
 
+	gettimeofday(&t0, NULL);
 	for (i = 0; i < N; i++) {
 		int d = rand();
+#if 0
 		intavl_tree_print(t, stdout);
 		printf("adding %d\n", d);
+#endif
 		intavl_tree_put(t, d, (void *)i);
 		if (avl_tree_chk(t)) break;
 	}
+	gettimeofday(&t1, NULL);
 
 	intavl_tree_print(t, stdout);
 #if 0
@@ -60,6 +68,13 @@ int main (int argc, char **argv)
 		printf("[%d]->%d\n", intavl_iterator_key(p), intavl_iterator_data(p));
 	}
 #endif
+	t1.tv_usec -= t0.tv_usec;
+	if (t1.tv_usec < 0) {
+		t1.tv_usec += 1000000;
+		t1.tv_sec--;
+	}
+	t1.tv_sec -= t0.tv_sec;
+	printf("elapsed time: %d.%06d\n", t1.tv_sec, t1.tv_usec);
 
 	return 0;
 } /* main */
