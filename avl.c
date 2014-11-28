@@ -164,6 +164,11 @@ static struct avl_node *avl_node_next(struct avl_node *n)
 	return n->parent;
 } /* avl_node_next */
 
+static int default_fcomp(const void *k1, const void *k2)
+{
+	return (const char *) k1 - (const char *) k2;
+} /* default_fcomp */
+
 static struct avl_node *avl_node_search(
 	struct avl_node *n,
 	const void *k,
@@ -173,6 +178,7 @@ static struct avl_node *avl_node_search(
 	struct avl_node *p = n;
 
 	if (!n) return NULL;
+	if (!fc) fc = default_fcomp;
 
 	for (;;) {
 		int cmp = fc(k, p->key); /* compare */

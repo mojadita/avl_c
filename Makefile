@@ -5,7 +5,7 @@
 # 		All rights reserved.
 
 MAJOR=3
-MINOR=2.1
+MINOR=2.2
 VERSION="$(MAJOR).$(MINOR)"
 CFLAGS += -DAVL_VERSION=\"$(VERSION)\"
 prefix=/usr

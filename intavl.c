@@ -8,35 +8,14 @@
 #include <stdio.h>
 #include "intavl.h"
 
-static int intcmp(const int i1, const int i2)
+static int int_print(const void *k, FILE *o)
 {
-	if (i1 < i2) return -1;
-	if (i1 > i2) return +1;
-	return 0;
-} /* intcmp */
-
-static void *intdup(void *i)
-{
-	return i; /* retornamos el propio valor */
-} /* intdup */
-
-static void intfree(void *i)
-{
-	/* nada */
-} /* intfree */
-
-static int intprnt(const int i, FILE *o)
-{
-	return fprintf(o, "%d", i);
-} /* intprnt */
+	return fprintf(o, "%d", (int)k);
+} /* int_print */
 
 AVL_TREE new_intavl_tree()
 {
-	return new_avl_tree(
-			(AVL_FCOMP)intcmp,
-			(AVL_FCONS)intdup,
-			(AVL_FDEST)intfree,
-			(AVL_FPRNT)intprnt);
+	return new_avl_tree(NULL, NULL, NULL, int_print);
 } /* new intavl_tree */
 
 AVL_ITERATOR intavl_tree_put(
