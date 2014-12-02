@@ -1153,23 +1153,25 @@ static void avl_node_print(struct avl_node *n, FILE *o, AVL_FPRNT pf)
 
 void avl_tree_print(AVL_TREE t, FILE *o)
 {
+#if DEBUG
 	fprintbuf(o,
 		sizeof(*t), t,
 		PR("TREE: "
 #if USE_CRC
 		"crc=0x%08x%s"
-#endif
+#endif /* USE_CRC */
 		)
 #if USE_CRC
 		, t->crc, CRC(t) ? BADCRC : ""
-#endif
+#endif /* USE_CRC */
 		);
+#endif /* DEBUG */
 	if (t->root)
 		avl_node_print(t->root, o, t->fprnt);
 #if USE_CRC
 	fprintf(o, PR("TREE: bad crcs = %d/%d\n"),
 		avl_tree_chk(t), avl_tree_size(t));
-#endif
+#endif /* USE_CRC */
 } /* avl_tree_print */
 
 #if USE_CRC
