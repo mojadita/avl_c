@@ -997,7 +997,8 @@ void *avl_tree_get(AVL_TREE t, const void *k)
 	p = avl_node_search(t->root, k, t->fcomp, &e);
 
 	return (e == AVL_EQU)
-		? p->data
+		? (void *)p->data  /* eliminate const as it isn't const outside
+                              this module */
 		: NULL;
 } /* avl_tree_get */
 
@@ -1020,10 +1021,10 @@ const void *avl_iterator_key(AVL_ITERATOR i)
 
 void *avl_iterator_data(AVL_ITERATOR i)
 {
-	return i->data;
+	return (void *) i->data; /* outside it is not const */
 } /* avl_iterator_data */
 
-void avl_iterator_set_data(AVL_ITERATOR i, void *d)
+void avl_iterator_set_data(AVL_ITERATOR i, const void *d)
 {
 	i->data = d;
 } /* avl_iterator_set_data */

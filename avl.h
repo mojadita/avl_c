@@ -188,7 +188,7 @@ void *avl_iterator_data(
 /* This function set the data pointer associated to an iterator */
 void avl_iterator_set_data(
 	AVL_ITERATOR i, /* iterator to set data pointer to */
-	void *d /* data pointer to set */
+	const void *d /* data pointer to set */
 );
 
 /* This function returns the number of failed CRCs in a tree. */
