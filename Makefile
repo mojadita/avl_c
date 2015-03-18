@@ -4,29 +4,32 @@
 # Disclaimer: (C) 2013 LUIS COLORADO SISTEMAS S.L.U.
 # 		All rights reserved.
 
-MAJOR=3
-MINOR=2.3
+MAJOR=3.2
+MINOR=4
 VERSION="$(MAJOR).$(MINOR)"
-CFLAGS += -DAVL_VERSION=\"$(VERSION)\"
+CFLAGS+=-DAVL_VERSION=\"$(VERSION)\"
 prefix=/usr
 
 avl_lib_dev		= libavl.so
 avl_soname		= $(avl_lib_dev).$(MAJOR)
 avl_lib			= $(avl_soname).$(MINOR)
-avl_lib_targets = $(avl_lib) $(avl_soname) $(avl_lib_dev)
+avl_slib		= $(avl_lib_dev:.so=.a)
 avl_lib_objs	= avl.so crc.so crc32ieee8023.so
+avl_slib_objs	= $(avl_lib_objs:.so=.o)
+
+avl_lib_targets = $(avl_slib) $(avl_lib) $(avl_soname) $(avl_lib_dev)
+avl_static_objs = $(avl_lib_objs:.so=.o)
 
 targets = $(avl_lib_targets) tstavl tstavl2 tstavl3
-ut_targets = ut_avl
 ut_libs = -lgmock -lgmock_main -lgtest -lpthread
 
 .PHONY: all clean ut
 .SUFFIXES: .c .o .so
 
 
-.c.o:
+%.o:%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
-.c.so:
+%.so:%.c
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 
 all: $(targets)
@@ -43,6 +46,8 @@ $(avl_soname): $(avl_lib) Makefile
 	ln -sf $< $@
 $(avl_lib): $(avl_lib_objs) avl.h Makefile
 	$(CC) $(CFLAGS) -o $@ -fPIC -shared -Wl,-soname=$(avl_soname) $(avl_lib_objs)
+
+$(avl_slib): $(avl_slib)($(avl_slib_objs))
 
 tstavl_objs = tstavl.o stravl.o fprintbuf.o $(avl_lib)
 
