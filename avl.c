@@ -859,13 +859,12 @@ AVL_ITERATOR avl_tree_put(
 	case AVL_EQU:
 		q->data = d; ADDCRC(q); return q;
 	case AVL_LFT:
-		ADDCRC(q->left = new_avl_node(k, d, q, t->fcons)); break;
+		ADDCRC(res = q->left = new_avl_node(k, d, q, t->fcons)); break;
 	case AVL_RGT:
-		ADDCRC(q->right = new_avl_node(k, d, q, t->fcons)); break;
+		ADDCRC(res = q->right = new_avl_node(k, d, q, t->fcons)); break;
 	} /* switch */
 
 	t->sz++; 
-	res = q;
 
 	for (crecido = TRUE; crecido && q; q = q->parent) {
 		switch (e) {
