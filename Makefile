@@ -35,7 +35,7 @@ ut_libs = -lgmock -lgmock_main -lgtest -lpthread
 all: $(targets)
 ut: $(ut_targets)
 clean:
-	$(RM) $(targets) $(tstavl_objs) $(tstavl2_objs) $(tstavl3_objs) $(avl_lib_objs)
+	$(RM) $(targets) $(tstavl_objs) $(tstavl2_objs) $(tstavl3_objs) $(avl_lib_objs) $(avl_slib_objs)
 install: $(targets)
 	ln -f $(avl_lib_targets) $(prefix)/lib
 	ln -f avl.h $(prefix)/include
