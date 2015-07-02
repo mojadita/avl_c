@@ -39,7 +39,7 @@ clean:
 install: $(targets)
 	ln -sf $(avl_lib) $(prefix)/lib/$(avl_soname)
 	ln -sf $(avl_soname) $(prefix)/lib/$(avl_lib_dev)
-	install -m 0711 $(avl_lib) $(prefix)/lib/$(avl_lib)
+	install -m 0644 $(avl_lib) $(prefix)/lib/$(avl_lib)
 	install -m 0644 avl.h $(prefix)/include/avl.h
 
 $(avl_lib_dev): $(avl_soname) Makefile
