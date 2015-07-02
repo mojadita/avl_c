@@ -34,8 +34,10 @@ ut: $(ut_targets)
 clean:
 	$(RM) $(targets) $(tstavl_objs) $(tstavl2_objs) $(tstavl3_objs) $(avl_lib_objs)
 install: $(targets)
-	ln -f $(avl_lib_targets) $(prefix)/lib
-	ln -f avl.h $(prefix)/include
+	ln -sf $(avl_lib) $(prefix)/lib/$(avl_soname)
+	ln -sf $(avl_soname) $(prefix)/lib/$(avl_lib_dev)
+	install -m 0711 $(avl_lib) $(prefix)/lib/$(avl_lib)
+	install -m 0644 avl.h $(prefix)/include/avl.h
 
 $(avl_lib_dev): $(avl_soname) Makefile
 	ln -sf $< $@
@@ -50,8 +52,9 @@ tstavl: $(tstavl_objs) Makefile
 	$(CC) $(LDFLAGS) -o tstavl $(tstavl_objs)
 
 tstavl2_objs = tstavl2.o intavl.o fprintbuf.o $(avl_lib)
+tstavl2_libs = -lrt
 tstavl2: $(tstavl2_objs) Makefile
-	$(CC) $(LDFLAGS) -o tstavl2 $(tstavl2_objs)
+	$(CC) $(LDFLAGS) -o tstavl2 $(tstavl2_objs) $(tstavl2_libs)
 
 tstavl3_objs = tstavl3.o
 tstavl3: $(tstavl3_objs) Makefile

@@ -15,17 +15,22 @@
 #define IN_TSTAVL_C
 
 /* Standard include files */
-#include <sys/time.h>
+#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
 #include <ctype.h>
+#include <getopt.h>
 #include "intavl.h"
 
-#define N 10000
+#define N 1000000
 
 /* variables */
 static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl2.c,v 1.7 2014/01/07 23:46:03 luis Exp $\n";
+
+#define PRINT_TREE  (1 << 0)
+int flags = 0;
+int n = N;
 
 void help()
 {
@@ -43,15 +48,30 @@ int main (int argc, char **argv)
 	AVL_TREE t = new_intavl_tree();
 	int i;
 	AVL_ITERATOR p;
-	struct timeval t0, t1;
+	struct timespec t0, t1;
+    int opt;
+    int seed;
 
-#if 0
-	srand(time(NULL));
-#endif
+    clock_gettime(CLOCK_REALTIME, &t0);
+    seed = t0.tv_nsec;
+
+    while ((opt = getopt(argc, argv, "pn:r:")) != EOF) {
+        switch (opt) {
+        case 'p': flags |= PRINT_TREE; break;
+        case 'n': n = atol(optarg);
+                  if (n == 0) n = N;
+                  break;
+        case 'r': seed = atol(optarg);
+                  printf("seed = %d\n", seed);
+                  break;
+        } /* switch */
+    } /* while */
+
+	srand(seed);
 	help();
 
-	gettimeofday(&t0, NULL);
-	for (i = 0; i < N; i++) {
+    clock_gettime(CLOCK_REALTIME, &t0);
+	for (i = 0; i < n; i++) {
 		int d = rand();
 #if 0
 		intavl_tree_print(t, stdout);
@@ -60,21 +80,27 @@ int main (int argc, char **argv)
 		intavl_tree_put(t, d, (void *)i);
 		if (avl_tree_chk(t)) break;
 	}
-	gettimeofday(&t1, NULL);
+    clock_gettime(CLOCK_REALTIME, &t1);
 
-	intavl_tree_print(t, stdout);
+    if (flags & PRINT_TREE)
+        intavl_tree_print(t, stdout);
 #if 0
 	for (p = intavl_tree_first(t); p; p = intavl_iterator_next(p)) {
 		printf("[%d]->%d\n", intavl_iterator_key(p), intavl_iterator_data(p));
 	}
 #endif
-	t1.tv_usec -= t0.tv_usec;
-	if (t1.tv_usec < 0) {
-		t1.tv_usec += 1000000;
+	t1.tv_nsec -= t0.tv_nsec;
+	if (t1.tv_nsec < 0) {
+		t1.tv_nsec += 1000000000;
 		t1.tv_sec--;
 	}
 	t1.tv_sec -= t0.tv_sec;
-	printf("elapsed time: %d.%06d\n", t1.tv_sec, t1.tv_usec);
+    printf("           n: %d\n", n);
+    printf("        seed: %d\n", seed);
+	printf("elapsed time: %d.%09d\n", t1.tv_sec, t1.tv_nsec);
+    clock_getres(CLOCK_REALTIME, &t0);
+    printf("   clock res: %d.%09d\n", t0.tv_sec, t0.tv_nsec);
+    printf("  collisions: %d\n", n - avl_tree_size(t));
 
 	return 0;
 } /* main */
