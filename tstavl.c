@@ -53,6 +53,7 @@ void help()
 		"#     devuelve el número de entradas de la tabla.\n"
 		"%%     borra todas las entradas de la tabla.\n"
 		"@n    genera n elementos aleatorios y los mezcla en la tabla.\n"
+        "s     imprime estadísticas de uso de malloc(3)\n"
 		".     termina el programa.\n"
 	);
 } /* help */
@@ -101,6 +102,8 @@ int main (int argc, char **argv)
 			if (!stravl_tree_del(t, p))
 				printf("Error: no puedo borrar [%s]\n", p);
 			continue;
+        case 's': malloc_stats();
+                  continue;
 		case '?': p++;
 			printf("%s: %s\n", p,
 				stravl_tree_has(t, p)
