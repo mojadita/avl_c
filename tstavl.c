@@ -21,7 +21,6 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
 #include <ctype.h>
 #include "stravl.h"
 
@@ -102,8 +101,10 @@ int main (int argc, char **argv)
 			if (!stravl_tree_del(t, p))
 				printf("Error: no puedo borrar [%s]\n", p);
 			continue;
+#if 0
         case 's': malloc_stats();
                   continue;
+#endif
 		case '?': p++;
 			printf("%s: %s\n", p,
 				stravl_tree_has(t, p)

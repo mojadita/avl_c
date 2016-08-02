@@ -8,7 +8,17 @@ MAJOR=3.2
 MINOR=4
 VERSION="$(MAJOR).$(MINOR)"
 CFLAGS+=-DAVL_VERSION=\"$(VERSION)\"
-prefix=/usr
+prefix=${HOME}
+incdir=$(prefix)/include
+libdir=$(prefix)/lib
+RM = rm -f
+INSTALL = install
+MKLINK = ln -sf
+UMOD = -o root -g wheel
+LMOD = -m 0644
+DMOD = -m 0755
+XMOD = -m 0711
+FMOD = -m 0644
 
 avl_lib_dev		= libavl.so
 avl_soname		= $(avl_lib_dev).$(MAJOR)
@@ -27,25 +37,27 @@ ut_libs = -lgmock -lgmock_main -lgtest -lpthread
 .SUFFIXES: .c .o .so
 
 
-%.o:%.c
-	$(CC) $(CFLAGS) -c -o $@ $<
-%.so:%.c
-	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
+.c.o:
+	$(CC) $(CFLAGS) -c -o $@ $?
+.c.so:
+	$(CC) $(CFLAGS) -fPIC -c -o $@ $?
 
 all: $(targets)
 ut: $(ut_targets)
 clean:
 	$(RM) $(targets) $(tstavl_objs) $(tstavl2_objs) $(tstavl3_objs) $(avl_lib_objs) $(avl_slib_objs)
 install: $(targets)
-	ln -sf $(avl_lib) $(prefix)/lib/$(avl_soname)
-	ln -sf $(avl_soname) $(prefix)/lib/$(avl_lib_dev)
-	install -m 0644 $(avl_lib) $(prefix)/lib/$(avl_lib)
-	install -m 0644 avl.h $(prefix)/include/avl.h
+	$(INSTALL) $(DMOD) -d $(libdir) 
+	$(INSTALL) $(DMOD) -d $(incdir)
+	$(INSTALL) $(LMOD) $(avl_lib) $(libdir)/$(avl_lib)
+	$(INSTALL) $(FMOD) avl.h $(incdir)/avl.h
+	$(MKLINK) $(avl_lib) $(libdir)/$(avl_soname)
+	$(MKLINK) $(avl_soname) $(libdir)/$(avl_lib_dev)
 
 $(avl_lib_dev): $(avl_soname) Makefile
-	ln -sf $< $@
+	ln -sf $(avl_soname) $@
 $(avl_soname): $(avl_lib) Makefile
-	ln -sf $< $@
+	ln -sf $(avl_lib) $@
 $(avl_lib): $(avl_lib_objs) avl.h Makefile
 	$(CC) $(CFLAGS) -o $@ -fPIC -shared -Wl,-soname=$(avl_soname) $(avl_lib_objs)
 
