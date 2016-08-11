@@ -15,18 +15,14 @@
 #define IN_TSTAVL_C
 
 /* Standard include files */
+#include <ctype.h>
 #include <getopt.h>
-#include <sys/time.h>
-#include <time.h>
-#include <stdio.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-<<<<<<< HEAD
-=======
-#include <stdlib.h>
->>>>>>> 70f5288c0959c8f497084bbe02725843ed634bc8
-#include <ctype.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "stravl.h"
 
@@ -111,11 +107,7 @@ int main (int argc, char **argv)
 			if (!stravl_tree_del(t, p))
 				printf("Error: no puedo borrar [%s]\n", p);
 			continue;
-<<<<<<< HEAD
-#if 0
-=======
 #if HAS_MALLOC_STATS
->>>>>>> 70f5288c0959c8f497084bbe02725843ed634bc8
         case 's': malloc_stats();
                   continue;
 #endif
