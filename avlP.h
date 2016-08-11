@@ -8,8 +8,6 @@
 #define _AVLP_H
 
 #include "avl.h"
-#include "crc.h"
-#include "crc32ieee8023.h"
 
 /* constants */
 #ifndef DEBUG
@@ -18,6 +16,11 @@
 
 #ifndef USE_CRC
 #define USE_CRC			(DEBUG)
+#endif
+
+#if USE_CRC
+#include <crc.h>
+#include <crc_alltables.h>
 #endif
 
 #ifdef DEB
