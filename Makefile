@@ -20,6 +20,8 @@ CFLAGS	+= -DAVL_VERSION=\"$(VERSION)\"
 
 INSTALL = install
 RM		= rm -f
+AR	= ar
+RANLIB	= ranlib
 LINK	= ln -sf
 DMOD	?= -m 0755
 XMOD	?= -m 0711
