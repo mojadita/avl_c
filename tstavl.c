@@ -21,9 +21,13 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include "stravl.h"
+
+#ifndef HAS_MALLOC_STATS
+#define HAS_MALLOC_STATS 0
+#endif
 
 /* variables */
 static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.8 2014/01/22 08:01:21 luis Exp $\n";
@@ -102,8 +106,10 @@ int main (int argc, char **argv)
 			if (!stravl_tree_del(t, p))
 				printf("Error: no puedo borrar [%s]\n", p);
 			continue;
+#if HAS_MALLOC_STATS
         case 's': malloc_stats();
                   continue;
+#endif
 		case '?': p++;
 			printf("%s: %s\n", p,
 				stravl_tree_has(t, p)
