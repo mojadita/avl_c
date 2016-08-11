@@ -15,6 +15,7 @@
 #define IN_TSTAVL_C
 
 /* Standard include files */
+#include <getopt.h>
 #include <sys/time.h>
 #include <time.h>
 #include <stdio.h>
@@ -23,6 +24,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
 #include "stravl.h"
 
 #ifndef HAS_MALLOC_STATS
@@ -71,7 +73,7 @@ int main (int argc, char **argv)
 	int opt;
 
 	{ char *p;
-		if (p = getenv("PAGER")) {
+		if ((p = getenv("PAGER")) != 0) {
 			pager = p;
 		}
 	}
