@@ -68,7 +68,7 @@ int main (int argc, char **argv)
 {
 	char buffer[1024];
 	AVL_TREE t = new_stravl_tree(strcasecmp);
-	int NN = 0;
+	long NN = 0;
 	int opt;
 
 	{ char *p;

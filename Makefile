@@ -41,17 +41,17 @@ avl_so_objs		= $(avl_a_objs:.o=.so)
 toclean			+= $(avl_a_objs) $(avl_so_objs)
 
 targets			= $(avl_so) $(avl_a)
+ut_targets		= ut_avl
 toclean			+= $(targets)
 
 test_targets	= tstavl tstavl2 tstavl3
-toclean			+= $(test_targets)
 
 install_headers = avl.h intavl.h stravl.h
 
 ut_libs = -lgmock -lgmock_main -lgtest -lpthread
 
 .PHONY: all clean ut install deinstall
-.SUFFIXES: .c .o .so
+.SUFFIXES: .so
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -64,16 +64,18 @@ test: $(test_targets)
 clean:
 	$(RM) $(toclean)
 install: all
-	for i in $(libdir) $(datadir) $(bindir) $(incdir); \
+	-@for i in $(libdir) $(datadir) $(bindir) $(incdir); \
 	do \
+		echo $(INSTALL) $(DMOD) $(OWNER) -d $$i; \
 		$(INSTALL) $(DMOD) $(OWNER) -d $$i; \
 	done
 	$(INSTALL) $(FMOD) $(avl_a) $(libdir)/$(avl_a)
 	$(INSTALL) $(FMOD) $(avl_fullname) $(libdir)/$(avl_fullname)
 	$(LINK) $(avl_fullname) $(libdir)/$(avl_soname)
 	$(LINK) $(avl_soname) $(libdir)/$(avl_so)
-	for i in $(install_headers);\
+	-@for i in $(install_headers);\
 	do\
+		echo $(INSTALL) $(FMOD) $(OWNER) $$i $(incdir)/$$i ;\
 		$(INSTALL) $(FMOD) $(OWNER) $$i $(incdir)/$$i ;\
 	done
 deinstall:
@@ -81,8 +83,9 @@ deinstall:
 	$(RM) $(libdir)/$(avl_so)
 	$(RM) $(libdir)/$(avl_soname)
 	$(RM) $(libdir)/$(avl_fullname)
-	for i in $(install_headers);\
+	-@for i in $(install_headers);\
 	do\
+		echo $(RM) $(incdir)/$$i ;\
 		$(RM) $(incdir)/$$i ;\
 	done
 
