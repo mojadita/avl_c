@@ -11,8 +11,8 @@ bindir  ?= $(prefix)/bin
 libdir  ?= $(prefix)/lib
 datadir ?= $(prefix)/share/$(package)
 
-MAJOR	=3.3
-MINOR	=5
+MAJOR	=4
+MINOR	=0
 VERSION	= $(MAJOR).$(MINOR)
 CFLAGS  ?= -O3
 LDFLAGS ?=
