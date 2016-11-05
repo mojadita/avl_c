@@ -12,7 +12,7 @@ libdir  ?= $(prefix)/lib
 datadir ?= $(prefix)/share/$(package)
 
 MAJOR	=4
-MINOR	=0
+MINOR	=1
 VERSION	= $(MAJOR).$(MINOR)
 CFLAGS  ?= -O3
 LDFLAGS ?=

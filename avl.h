@@ -45,7 +45,7 @@ typedef int (*AVL_FCOMP)(const void *k1, const void *k2);
 /* the next type is for a copy constructor for the key, so we can use
  * different key types if we have a proper constructor and a proper
  * destructor. */
-typedef const void *(*AVL_FCONS)(const void *k);
+typedef void *(*AVL_FCONS)(const void *k);
 
 /* the next type is for the destructor for the key. */
 typedef void (*AVL_FDEST)(const void *k);
