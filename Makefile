@@ -50,7 +50,7 @@ install_headers = avl.h intavl.h stravl.h
 
 ut_libs = -lgmock -lgmock_main -lgtest -lpthread
 
-.PHONY: all clean ut install deinstall
+.PHONY: all clean ut install deinstall uninstall
 .SUFFIXES: .so
 
 .c.o:
@@ -88,6 +88,7 @@ deinstall:
 		echo $(RM) $(incdir)/$$i ;\
 		$(RM) $(incdir)/$$i ;\
 	done
+uninstall: deinstall
 
 $(avl_fullname): $(avl_so_objs) avl.h Makefile
 	$(CC) $(CFLAGS) -o $@ -shared -Wl,-soname=$(avl_soname) $(avl_so_objs)
