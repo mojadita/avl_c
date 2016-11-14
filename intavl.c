@@ -10,7 +10,7 @@
 
 static int int_print(const void *k, FILE *o)
 {
-	return fprintf(o, "%d", (long)k);
+	return fprintf(o, "%ld", (long)k);
 } /* int_print */
 
 AVL_TREE new_intavl_tree()

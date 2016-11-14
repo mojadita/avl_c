@@ -124,7 +124,7 @@ int main (int argc, char **argv)
 					  : stdout ;
 				for (i = stravl_tree_first(t); i; i = stravl_iterator_next(i)) {
 					time_t t = (time_t) stravl_iterator_data(i);
-					fprintf(o, "%-32s: [%8d]\n",
+					fprintf(o, "%-32s: [%8ld]\n",
 						stravl_iterator_key(i),
 						(long) stravl_iterator_data(i));
 				} /* for */
@@ -136,7 +136,7 @@ int main (int argc, char **argv)
 					  : stdout ;
 				for (i = stravl_tree_last(t); i; i = stravl_iterator_prev(i)) {
 					time_t t = (time_t) stravl_iterator_data(i);
-					fprintf(o, "%-32s: [%8d]\n",
+					fprintf(o, "%-32s: [%8ld]\n",
 						stravl_iterator_key(i),
 						(long) stravl_iterator_data(i));
 				} /* for */
