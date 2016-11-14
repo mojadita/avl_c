@@ -46,7 +46,7 @@ void help()
 int main (int argc, char **argv)
 {
 	AVL_TREE t = new_intavl_tree();
-	int i;
+	long i;
 	AVL_ITERATOR p;
 	struct timespec t0, t1;
     int opt;

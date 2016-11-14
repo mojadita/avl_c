@@ -126,7 +126,7 @@ int main (int argc, char **argv)
 					time_t t = (time_t) stravl_iterator_data(i);
 					fprintf(o, "%-32s: [%8d]\n",
 						stravl_iterator_key(i),
-						(int) stravl_iterator_data(i));
+						(long) stravl_iterator_data(i));
 				} /* for */
 				if (flags & FLAG_USEPAGER) pclose(o);
 			}
@@ -138,7 +138,7 @@ int main (int argc, char **argv)
 					time_t t = (time_t) stravl_iterator_data(i);
 					fprintf(o, "%-32s: [%8d]\n",
 						stravl_iterator_key(i),
-						(int) stravl_iterator_data(i));
+						(long) stravl_iterator_data(i));
 				} /* for */
 				if (flags & FLAG_USEPAGER) pclose(o);
 			}
