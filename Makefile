@@ -12,7 +12,7 @@ libdir  ?= $(prefix)/lib
 datadir ?= $(prefix)/share/$(package)
 
 MAJOR	=4
-MINOR	=1
+MINOR	=3
 VERSION	= $(MAJOR).$(MINOR)
 CFLAGS  ?= -O3
 LDFLAGS ?=
@@ -37,25 +37,26 @@ avl_fullname	?= $(avl_soname).$(MINOR)
 toclean			+= $(avl_so) $(avl_a) $(avl_soname) $(avl_fullname)
 
 avl_a_objs		= avl.o stravl.o intavl.o
-avl_so_objs		= $(avl_a_objs:.o=.so)
+avl_so_objs		= $(avl_a_objs:.o=.pico)
 toclean			+= $(avl_a_objs) $(avl_so_objs)
 
 targets			= $(avl_so) $(avl_a)
 ut_targets		= ut_avl
 toclean			+= $(targets)
 
-test_targets	= tstavl tstavl2 tstavl3
+test_targets	= tstavl tstavl_so tstavl2 tstavl2_so tstavl3
+toclean			+= $(test_targets)
 
 install_headers = avl.h intavl.h stravl.h
 
 ut_libs = -lgmock -lgmock_main -lgtest -lpthread
 
 .PHONY: all clean ut install deinstall uninstall
-.SUFFIXES: .so
+.SUFFIXES: .pico
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
-.c.so:
+.c.pico:
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 
 all: $(targets)
@@ -112,7 +113,10 @@ tstavl_so: $(tstavl_so_objs)
 tstavl2_objs = tstavl2.o intavl.o $(avl_a)
 tstavl2_libs = -lrt
 tstavl2: $(tstavl2_objs)
-	$(CC) $(LDFLAGS) -o tstavl2 $(tstavl2_objs) $(tstavl2_libs)
+	$(CC) $(LDFLAGS) -o $@ $(tstavl2_objs) $(tstavl2_libs)
+tstavl2_so_objs = tstavl2.o intavl.o $(avl_so)
+tstavl2_so: $(tstavl2_so_objs)
+	$(CC) $(LDFLAGS) -o $@ $(tstavl2_so_objs) $(tstavl2_libs)
 
 tstavl3_objs = tstavl3.o
 tstavl3: $(tstavl3_objs)

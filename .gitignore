@@ -1,9 +1,12 @@
 *.o
-*.so
+*.pico
 *.so.*
+libavl.so
 CVS/
 tstavl
+tstavl_so
 tstavl2
+tstavl2_so
 tstavl3
 ut_avl
 libavl.a
