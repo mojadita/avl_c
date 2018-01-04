@@ -330,6 +330,7 @@ static struct avl_node *avl_node_unlink(
 				break;
 			} /* switch */
 			break;
+        case AVL_EQU: break;
 		} /* switch */
 		e = q->parent
 			? q->parent->left == q
@@ -466,6 +467,7 @@ static void avl_node_equilibrateLL(
 	case AVL_LFT:
 		l->equi = AVL_EQU; n->equi = AVL_EQU;
 		break;
+    case AVL_RGT: break;
 	} /* switch */
 	ADDCRC(n);
 	if (r) ADDCRC(r);
@@ -551,6 +553,7 @@ static void avl_node_equilibrateRR(
 		r->equi = AVL_LFT; n->equi = AVL_RGT; break;
 	case AVL_RGT:
 		r->equi = AVL_EQU; n->equi = AVL_EQU; break;
+    case AVL_LFT: break;
 	} /* switch */
 	ADDCRC(n);
 	if (l) ADDCRC(l);
@@ -816,6 +819,7 @@ AVL_ITERATOR avl_tree_atkey(
 		} break;
 	case MT_EQ: switch(e) {
 		case AVL_EQU: return n;
+        default: break;
 		} break;
 	case MT_GE: switch(e) {
 		case AVL_RGT: return avl_node_next(n);
@@ -887,6 +891,7 @@ AVL_ITERATOR avl_tree_put(
 							: &q->parent->right
 						: &t->root);
 					break;
+                case AVL_EQU: break;
 				} /* switch */
 				q = q->parent; /* so q points to the top node */
 				crecido = FALSE; /* tree has not grown in this case. */
@@ -914,12 +919,14 @@ AVL_ITERATOR avl_tree_put(
 							: &q->parent->left
 						: &t->root);
 					break;
+                case AVL_EQU: break;
 				} /* switch */
 				q = q->parent; /* so q points to the proper node */
 				crecido = FALSE; /* tree hasn't grow from here on. */
 				break;
 			} /* switch */
-		} /* if */
+        case AVL_EQU: break;
+		} /* switch */
 		e = q->parent
 			? q->parent->left == q
 				? AVL_LFT

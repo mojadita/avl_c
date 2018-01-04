@@ -9,7 +9,7 @@
 
 #include "avlP.h"
 
-#define P(X) printf(PR("%s = %lu\n"), #X, X)
+#define P(X) printf(PR("%s = %zu\n"), #X, X)
 
 int main()
 {

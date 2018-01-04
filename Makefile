@@ -6,7 +6,7 @@
 
 PACKAGE			?=avl
 MAJOR			?=3.2
-MINOR			?=7
+MINOR			?=8
 VERSION			?="$(MAJOR).$(MINOR)"
 CFLAGS 			+=-DAVL_VERSION=\"$(VERSION)\"
 
@@ -35,7 +35,7 @@ avl_so			=$(avl_base).so
 avl_soname		=$(avl_so).$(MAJOR)
 avl_fullname	=$(avl_soname).$(MINOR)
 avl_a			=$(avl_base).a
-avl_a_objs		=avl.o crc.o crc32ieee8023.o intavl.o stravl.o
+avl_a_objs		=avl.o intavl.o stravl.o
 avl_so_objs		=$(avl_a_objs:.o=.pico)
 toclean			+=$(avl_so) $(avl_soname) $(avl_fullname) $(avl_a)
 toclean			+=$(avl_a_objs) $(avl_so_objs)
@@ -51,6 +51,7 @@ ut_libs =-lgmock -lgmock_main -lgtest -lpthread
 
 all: $(targets)
 ut: $(ut_targets)
+test: $(test_targets)
 clean:
 	$(RM) $(toclean)
 install: $(targets)
@@ -108,14 +109,14 @@ toclean		+= $(tstavl3_objs)
 tstavl3: $(tstavl3_objs) $(tstavl_deps)
 	$(CC) $(LDFLAGS) -o $@ $($@_objs) $(tstavl_ldflags) $(tstavl_libs)
 
+$(avl_so_objs) $(avl_a_objs): avl.h avlP.h
+tstavl.o tstavl2.o tstavl3.o: avl.h
 tstavl3.o avl.o: avlP.h
 avl.o stravl.o intavl.o tstavl.o tstavl2.o tstavl3.o: avl.h
 avl.pico stravl.pico intavl.pico: avl.h
-avl.pico: avlP.h crc.h crc32ieee8023.h
-crc.o crc.pico: crc.h
-crc32ieee8023.o crc32ieee8023.pico: crc32ieee8023.h
+avl.pico: avlP.h
 
-ut_avl_objs = ut_avl.o libavl.so
+ut_avl_objs = ut_avl.o $(avl_so)
 
 ut_avl: $(ut_avl_objs)
 	$(CXX) $(LDFLAGS) -o $@ $(ut_avl_objs) $(ut_libs)

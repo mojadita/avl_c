@@ -17,13 +17,19 @@
 /* Standard include files */
 #include <ctype.h>
 #include <errno.h>
+#include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
+
 #include "stravl.h"
+
+#ifndef HAS_MALLOC_STATS
+#define HAS_MALLOC_STATS 0
+#endif
 
 /* variables */
 static char TSTAVL_CPP_RCSId[]="\n$Id: tstavl.c,v 1.8 2014/01/22 08:01:21 luis Exp $\n";
@@ -89,11 +95,11 @@ int main (int argc, char **argv)
 {
 	char buffer[1024];
 	AVL_TREE t = new_stravl_tree(strcasecmp);
-	int NN = 0;
+	long NN = 0;
 	int opt;
 
 	{ char *p;
-		if (p = getenv("PAGER")) {
+		if ((p = getenv("PAGER")) != 0) {
 			pager = p;
 		}
 	}
@@ -132,8 +138,10 @@ int main (int argc, char **argv)
 				printf("Error: no puedo borrar [%s]\n", p);
             print_timestamp();
 			continue;
+#if HAS_MALLOC_STATS
         case 's': malloc_stats();
                   continue;
+#endif
 		case '?': p++;
             set_timestamp();
 			printf("%s: %s\n", p,
@@ -155,9 +163,9 @@ int main (int argc, char **argv)
                 set_timestamp();
 				for (i = stravl_tree_first(t); i; i = stravl_iterator_next(i)) {
 					time_t t = (time_t) stravl_iterator_data(i);
-					fprintf(o, "%-32s: [%8d]\n",
+					fprintf(o, "%-32s: [%8ld]\n",
 						stravl_iterator_key(i),
-						(int) stravl_iterator_data(i));
+						(long) stravl_iterator_data(i));
 				} /* for */
                 print_timestamp();
 				if (flags & FLAG_USEPAGER) pclose(o);
@@ -169,9 +177,9 @@ int main (int argc, char **argv)
                 set_timestamp();
 				for (i = stravl_tree_last(t); i; i = stravl_iterator_prev(i)) {
 					time_t t = (time_t) stravl_iterator_data(i);
-					fprintf(o, "%-32s: [%8d]\n",
+					fprintf(o, "%-32s: [%8ld]\n",
 						stravl_iterator_key(i),
-						(int) stravl_iterator_data(i));
+						(long) stravl_iterator_data(i));
 				} /* for */
                 print_timestamp();
 				if (flags & FLAG_USEPAGER) pclose(o);

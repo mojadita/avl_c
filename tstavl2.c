@@ -15,6 +15,10 @@
 #define IN_TSTAVL_C
 
 /* Standard include files */
+#include <time.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -46,7 +50,7 @@ void help()
 int main (int argc, char **argv)
 {
 	AVL_TREE t = new_intavl_tree();
-	int i;
+	long i;
 	AVL_ITERATOR p;
 	struct timespec t0, t1;
     int opt;
@@ -97,9 +101,9 @@ int main (int argc, char **argv)
 	t1.tv_sec -= t0.tv_sec;
     printf("           n: %d\n", n);
     printf("        seed: %d\n", seed);
-	printf("elapsed time: %d.%09d\n", t1.tv_sec, t1.tv_nsec);
+	printf("elapsed time: %ld.%09ld\n", t1.tv_sec, t1.tv_nsec);
     clock_getres(CLOCK_REALTIME, &t0);
-    printf("   clock res: %d.%09d\n", t0.tv_sec, t0.tv_nsec);
+    printf("   clock res: %ld.%09ld\n", t0.tv_sec, t0.tv_nsec);
     printf("  collisions: %d\n", n - avl_tree_size(t));
 
 	return 0;
