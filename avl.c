@@ -40,23 +40,19 @@
 	(CRC_BYTE *)(p), sizeof(*(p)), \
 	crc32ieee8023)
 #else /* USE_CRC */
-#define ADDCRC(p) do { p; } while(0)
+#define ADDCRC(p)
 #define CRC(p) (0)
 #endif
 
-#define BADCRC	" \033[1;33;41mBADCRC\033[0m"
+#define BADCRC	" \033[1;33;41mBADCRC\033[m"
 /* Standard include files */
-
-/* variables */
-static char AVL_CPP_RCSId[]="\n$Id: avl.c,v 1.9 2014/08/08 19:10:09 luis Exp $\n";
-
 
 /* functions */
 static char *avl_equ2str(avl_equ equ)
 {
 	switch(equ) {
 	case AVL_RGT: return "/\\";
-	case AVL_EQU: return "<>";
+	case AVL_EQU: return "()";
 	case AVL_LFT: return "\\/";
 	default: return "??";
 	} /* switch */
@@ -847,7 +843,8 @@ AVL_ITERATOR avl_tree_put(
 
 	if (!t->root) {
 		/* FIRST NODE IN THE TREE. */
-		ADDCRC(t->root = new_avl_node(k, d, NULL, t->fcons));
+		t->root = new_avl_node(k, d, NULL, t->fcons);
+        ADDCRC(t->root);
 		t->sz++;
 		ADDCRC(t);
 		return t->root;
@@ -859,9 +856,11 @@ AVL_ITERATOR avl_tree_put(
 	case AVL_EQU:
 		q->data = d; ADDCRC(q); return q;
 	case AVL_LFT:
-		ADDCRC(res = q->left = new_avl_node(k, d, q, t->fcons)); break;
+		res = q->left = new_avl_node(k, d, q, t->fcons);
+        ADDCRC(res); break;
 	case AVL_RGT:
-		ADDCRC(res = q->right = new_avl_node(k, d, q, t->fcons)); break;
+		res = q->right = new_avl_node(k, d, q, t->fcons);
+        ADDCRC(res); break;
 	} /* switch */
 
 	t->sz++; 

@@ -5,9 +5,9 @@
  *             All rights reserved.
  */
 
-#include <string.h>
-#include <malloc.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "stravl.h"
 
 AVL_TREE new_stravl_tree(STRAVL_FCOMP fc)

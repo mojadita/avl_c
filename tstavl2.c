@@ -15,12 +15,12 @@
 #define IN_TSTAVL_C
 
 /* Standard include files */
-#include <time.h>
-#include <stdio.h>
-#include <string.h>
-#include <malloc.h>
 #include <ctype.h>
 #include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include "intavl.h"
 
 #define N 1000000

@@ -15,14 +15,14 @@
 #define IN_TSTAVL_C
 
 /* Standard include files */
-#include <sys/time.h>
-#include <time.h>
-#include <stdio.h>
+#include <ctype.h>
+#include <errno.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
-#include <ctype.h>
+#include <sys/time.h>
+#include <time.h>
 #include "stravl.h"
 
 /* variables */
@@ -58,6 +58,32 @@ void help()
 	);
 } /* help */
 
+static struct timespec beg_ts;
+static int			   beg_res;
+void set_timestamp()
+{
+
+	beg_res = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &beg_ts);
+	if (beg_res < 0) {
+		fprintf(stderr, "ERROR: clock_gettime: %s (errno = %d)\n",
+			strerror(errno), errno);
+	} /* if */
+} /* set_timestamp */
+
+void print_timestamp()
+{
+	struct timespec end_ts;
+	int res = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end_ts);
+	end_ts.tv_nsec -= beg_ts.tv_nsec;
+	end_ts.tv_sec -= beg_ts.tv_sec;
+	if (end_ts.tv_nsec < 0) {
+		end_ts.tv_nsec += 1000000000L;
+		end_ts.tv_sec--;
+	} /* if */
+	printf("CPU time elapsed: %lu.%09lu\n",
+		end_ts.tv_sec, end_ts.tv_nsec);
+} /* print_timestamp */
+
 /* main program */
 int main (int argc, char **argv)
 {
@@ -91,7 +117,9 @@ int main (int argc, char **argv)
 			FILE *o = flags & FLAG_USEPAGER
 				? popen(pager, "w")
 				: stdout;
+            set_timestamp();
 			stravl_tree_print(t, o);
+            print_timestamp();
 			if (flags & FLAG_USEPAGER) pclose(o);
 			continue;
 		} /* if */
@@ -99,45 +127,60 @@ int main (int argc, char **argv)
 		switch (*p) {
 			AVL_MT op;
 		case '-': p++;
+            set_timestamp();
 			if (!stravl_tree_del(t, p))
 				printf("Error: no puedo borrar [%s]\n", p);
+            print_timestamp();
 			continue;
         case 's': malloc_stats();
                   continue;
 		case '?': p++;
+            set_timestamp();
 			printf("%s: %s\n", p,
 				stravl_tree_has(t, p)
 					? "TRUE"
 					: "FALSE");
+            print_timestamp();
 			continue;
-		case '+': p++; stravl_tree_put(t, p, (void *)++NN); continue;
+		case '+':
+            p++;
+            set_timestamp();
+            stravl_tree_put(t, p, (void *)++NN);
+            print_timestamp();
+            continue;
 		default: help(); continue;
 		case '*': { FILE *o = flags & FLAG_USEPAGER
 					  ? popen(pager, "w")
 					  : stdout ;
+                set_timestamp();
 				for (i = stravl_tree_first(t); i; i = stravl_iterator_next(i)) {
 					time_t t = (time_t) stravl_iterator_data(i);
 					fprintf(o, "%-32s: [%8d]\n",
 						stravl_iterator_key(i),
 						(int) stravl_iterator_data(i));
 				} /* for */
+                print_timestamp();
 				if (flags & FLAG_USEPAGER) pclose(o);
 			}
 			continue;
 		case '/': { FILE *o = flags & FLAG_USEPAGER
 					  ? popen("less", "w")
 					  : stdout ;
+                set_timestamp();
 				for (i = stravl_tree_last(t); i; i = stravl_iterator_prev(i)) {
 					time_t t = (time_t) stravl_iterator_data(i);
 					fprintf(o, "%-32s: [%8d]\n",
 						stravl_iterator_key(i),
 						(int) stravl_iterator_data(i));
 				} /* for */
+                print_timestamp();
 				if (flags & FLAG_USEPAGER) pclose(o);
 			}
 			continue;
 		case '#':
+            set_timestamp();
 			printf("#: %d\n", stravl_tree_size(t));
+            print_timestamp();
 			continue;
 		case '=': p++;
 			op = MT_EQ;
@@ -156,16 +199,21 @@ int main (int argc, char **argv)
 				op = MT_G;
 			} /* if */
 common:
+			set_timestamp();
 			i = stravl_tree_atkey(t, p, op);
 			if (i) printf("Busco \"%s\" -> [%s]\n", buffer, stravl_iterator_key(i));
+			print_timestamp();
 			continue;
 		case '%':
+			set_timestamp();
 			stravl_tree_clear(t);
+			print_timestamp();
 			NN = 0;
 			continue;
 		case '@':
 			{	int i, N = 10;
 				sscanf(buffer+1, "%d", &N);
+				set_timestamp();
 				for (i = 0; i < N; i++) {
 					int j, n;
 					n = rand() % 8 + 6;
@@ -175,10 +223,13 @@ common:
 					buffer[j] = '\0';
 					stravl_tree_put(t, buffer, (void *) ++NN);
 				} /* for */
+				print_timestamp();
 			} /* block */
 			break;
 		case '!':
+			set_timestamp();
 			printf("Empty: %s\n", stravl_tree_empty(t) ? "TRUE" : "FALSE");
+			print_timestamp();
 			continue;
 		case '.': goto exit;
 		} /* switch */

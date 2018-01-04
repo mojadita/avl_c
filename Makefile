@@ -4,77 +4,120 @@
 # Disclaimer: (C) 2013 LUIS COLORADO SISTEMAS S.L.U.
 # 		All rights reserved.
 
-MAJOR=3.2
-MINOR=4
-VERSION="$(MAJOR).$(MINOR)"
-CFLAGS+=-DAVL_VERSION=\"$(VERSION)\"
-prefix=/usr
+PACKAGE			?=avl
+MAJOR			?=3.2
+MINOR			?=7
+VERSION			?="$(MAJOR).$(MINOR)"
+CFLAGS 			+=-DAVL_VERSION=\"$(VERSION)\"
 
-avl_lib_dev		= libavl.so
-avl_soname		= $(avl_lib_dev).$(MAJOR)
-avl_lib			= $(avl_soname).$(MINOR)
-avl_slib		= $(avl_lib_dev:.so=.a)
-avl_lib_objs	= avl.so crc.so crc32ieee8023.so
-avl_slib_objs	= $(avl_lib_objs:.so=.o)
+prefix			?=	${HOME}
+user			!=	id -u
+group			!=	id -g
 
-avl_lib_targets = $(avl_slib) $(avl_lib) $(avl_soname) $(avl_lib_dev)
-avl_static_objs = $(avl_lib_objs:.so=.o)
+usr				?= $(user)
+grp				?= $(group)
 
-targets = $(avl_lib_targets) tstavl tstavl2 tstavl3
-ut_libs = -lgmock -lgmock_main -lgtest -lpthread
+RM				?= -rm -f
+LINK			?= ln -sf
+RANLIB			?= ranlib
+INSTALL			?= install
+idir			?= $(prefix)/include
+ldir			?= $(prefix)/lib
+dmod			?= -m 0755 -d
+xmod			?= -m 0711
+fmod			?= -m 0644
+umod			?= -o $(usr)
+gmod			?= -g $(grp)
+IFLAGS			?= $(umod) $(gmod)
+
+avl_base		=lib$(PACKAGE)
+avl_so			=$(avl_base).so
+avl_soname		=$(avl_so).$(MAJOR)
+avl_fullname	=$(avl_soname).$(MINOR)
+avl_a			=$(avl_base).a
+avl_a_objs		=avl.o crc.o crc32ieee8023.o intavl.o stravl.o
+avl_so_objs		=$(avl_a_objs:.o=.pico)
+toclean			+=$(avl_so) $(avl_soname) $(avl_fullname) $(avl_a)
+toclean			+=$(avl_a_objs) $(avl_so_objs)
+
+targets =tstavl tstavl2 tstavl3
+ut_libs =-lgmock -lgmock_main -lgtest -lpthread
 
 .PHONY: all clean ut
-.SUFFIXES: .c .o .so
+.SUFFIXES: .pico
 
-
-%.o:%.c
-	$(CC) $(CFLAGS) -c -o $@ $<
-%.so:%.c
+.c.pico:
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
 
 all: $(targets)
 ut: $(ut_targets)
 clean:
-	$(RM) $(targets) $(tstavl_objs) $(tstavl2_objs) $(tstavl3_objs) $(avl_lib_objs) $(avl_slib_objs)
+	$(RM) $(toclean)
 install: $(targets)
-	ln -sf $(avl_lib) $(prefix)/lib/$(avl_soname)
-	ln -sf $(avl_soname) $(prefix)/lib/$(avl_lib_dev)
-	install -m 0644 $(avl_lib) $(prefix)/lib/$(avl_lib)
-	install -m 0644 avl.h $(prefix)/include/avl.h
+	$(INSTALL) $(IFLAGS) $(dmod) $(idir)
+	$(INSTALL) $(IFLAGS) $(dmod) $(ldir)
+	$(INSTALL) $(IFLAGS) $(fmod) $(avl_a) $(ldir)
+	$(INSTALL) $(IFLAGS) $(xmod) $(avl_fullname) $(ldir)
+	$(INSTALL) $(IFLAGS) $(fmod) avl.h $(idir)
+	$(LINK) $(avl_soname) $(ldir)/$(avl_so)
+	$(LINK) $(avl_fullname) $(ldir)/$(avl_soname)
+deinstall:
+	$(RM) $(idir)/avl.h
+	$(RM) $(ldir)/$(avl_fullname)
+	$(RM) $(ldir)/$(avl_soname)
+	$(RM) $(ldir)/$(avl_so)
+	$(RM) $(ldir)/$(avl_a)
 
-$(avl_lib_dev): $(avl_soname) Makefile
-	ln -sf $< $@
-$(avl_soname): $(avl_lib) Makefile
-	ln -sf $< $@
-$(avl_lib): $(avl_lib_objs) avl.h Makefile
-	$(CC) $(CFLAGS) -o $@ -fPIC -shared -Wl,-soname=$(avl_soname) $(avl_lib_objs)
+$(avl_so): $(avl_soname)
+	$(LINK) $< $@
 
-$(avl_slib): $(avl_slib)($(avl_slib_objs))
+$(avl_soname): $(avl_fullname)
+	$(LINK) $< $@
 
-tstavl_objs = tstavl.o stravl.o fprintbuf.o $(avl_lib)
+$(avl_fullname): $(avl_so_objs)
+	$(LD) $(LDFLAGS) -o $@ -shared -soname=$(avl_soname) $(avl_so_objs)
 
-tstavl: $(tstavl_objs) Makefile
-	$(CC) $(LDFLAGS) -o tstavl $(tstavl_objs)
+$(avl_a): $(avl_a)($(avl_a_objs))
+	$(RANLIB) $@
 
-tstavl2_objs = tstavl2.o intavl.o fprintbuf.o $(avl_lib)
-tstavl2_libs = -lrt
-tstavl2: $(tstavl2_objs) Makefile
-	$(CC) $(LDFLAGS) -o tstavl2 $(tstavl2_objs) $(tstavl2_libs)
+$(avl_a)($(avl_a_objs)): $(avl_a_objs:.o=.c)
+	$(CC) $(CFLAGS) -c $?
+	$(AR) -r $@ $(?:.c=.o)
+
+	$(RM) $(?:.c=.o)
+
+common_objs = fprintbuf.o
+toclean 	+= $(common_objs)
+
+tstavl_objs = tstavl.o
+toclean		+= $(tstavl_objs)
+tstavl_deps = $(avl_so) $(avl_a)
+tstavl_ldflags = -L.
+tstavl_libs = -l$(PACKAGE)
+
+tstavl: $(tstavl_objs) $(common_objs) $(tstavl_deps)
+	$(CC) $(LDFLAGS) -o $@ $($@_objs) $(common_objs) $(tstavl_ldflags) $(tstavl_libs)
+
+tstavl2_objs = tstavl2.o
+toclean		+= $(tstavl2_objs)
+tstavl2: $(tstavl2_objs) $(common_objs) $(tstavl_deps)
+	$(CC) $(LDFLAGS) -o $@ $($@_objs) $(common_objs) $(tstavl_ldflags) $(tstavl_libs)
 
 tstavl3_objs = tstavl3.o
-tstavl3: $(tstavl3_objs) Makefile
-	$(CC) $(LDFLAGS) -o tstavl3 $(tstavl3_objs)
+toclean		+= $(tstavl3_objs)
+tstavl3: $(tstavl3_objs) $(tstavl_deps)
+	$(CC) $(LDFLAGS) -o $@ $($@_objs) $(tstavl_ldflags) $(tstavl_libs)
 
 tstavl3.o avl.o: avlP.h
-avl.o tstavl.o tstavl2.o tstavl3.o: avl.h Makefile
+avl.o stravl.o intavl.o tstavl.o tstavl2.o tstavl3.o: avl.h
+avl.pico stravl.pico intavl.pico: avl.h
+avl.pico: avlP.h crc.h crc32ieee8023.h
+crc.o crc.pico: crc.h
+crc32ieee8023.o crc32ieee8023.pico: crc32ieee8023.h
 
 ut_avl_objs = ut_avl.o libavl.so
 
 ut_avl: $(ut_avl_objs)
 	$(CXX) $(LDFLAGS) -o $@ $(ut_avl_objs) $(ut_libs)
-
-avl.so: avl.h avlP.h crc.h crc32ieee8023.h
-crc.so: crc.h
-crc32ieee8023.so: crc32ieee8023.h
 
 # $Id: Makefile,v 1.5 2014/08/08 19:25:50 luis Exp $

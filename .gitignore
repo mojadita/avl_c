@@ -1,4 +1,5 @@
 *.o
+*.pico
 *.so
 *.so.*
 CVS/
