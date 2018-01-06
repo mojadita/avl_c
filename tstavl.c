@@ -158,7 +158,10 @@ int main (int argc, char **argv)
             stravl_tree_put(t, p, (void *)++NN);
             print_timestamp();
             continue;
-		default: help(); continue;
+		default:
+            printf("ERROR: entrada inválida: %s\n",
+                    p);
+            help(); continue;
 		case '*': { FILE *o = flags & FLAG_USEPAGER
 					  ? popen(pager, "w")
 					  : stdout ;
