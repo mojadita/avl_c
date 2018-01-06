@@ -59,7 +59,9 @@ void help()
 		"#     devuelve el número de entradas de la tabla.\n"
 		"%%     borra todas las entradas de la tabla.\n"
 		"@n    genera n elementos aleatorios y los mezcla en la tabla.\n"
+#if HAS_MALLOC_STATS
         "s     imprime estadísticas de uso de malloc(3)\n"
+#endif
 		".     termina el programa.\n"
 	);
 } /* help */
