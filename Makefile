@@ -75,10 +75,10 @@ deinstall:
 	$(RM) $(ldir)/$(avl_a)
 
 $(avl_so): $(avl_soname)
-	$(LINK) $> $@
+	$(LINK) $(avl_soname) $@
 
 $(avl_soname): $(avl_fullname)
-	$(LINK) $> $@
+	$(LINK) $(avl_fullname) $@
 
 $(avl_fullname): $(avl_so_objs)
 	$(LD) $(LDFLAGS) -o $@ -shared -soname=$(avl_soname) $(avl_so_objs)

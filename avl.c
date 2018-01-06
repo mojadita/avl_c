@@ -26,19 +26,21 @@
 #define PAGESIZE	4096U
 #define N_NODES	((PAGESIZE)/sizeof(union avl_node_alloc))
 
-#define CRC_INITIAL	0
+#define CRC_INITIAL	(0x2589f3aeUL)
 
 #if USE_CRC
-#define ADDCRC(p) do { \
-		add_crc(CRC_INITIAL, \
+#define ADDCRC(p) do {                 \
+        if (!p) break;                 \
+		add_crc(CRC_INITIAL,           \
 		(CRC_BYTE *)(p), sizeof(*(p)), \
-		crc32ieee8023); \
+		crc32ieee8023);                \
 	} while (0)
 
-#define CRC(p) \
-	do_crc(CRC_INITIAL, \
+#define CRC(p)                     \
+	do_crc(CRC_INITIAL,            \
 	(CRC_BYTE *)(p), sizeof(*(p)), \
 	crc32ieee8023)
+
 #else /* USE_CRC */
 #define ADDCRC(p)
 #define CRC(p) (0)
@@ -340,7 +342,7 @@ static struct avl_node *avl_node_unlink(
 		ADDCRC(q);
 	} /* for */
 
-	if (q) ADDCRC(q);
+	ADDCRC(q);
 
 	/* if unlinked node is not n, that means that n had
 	 * both children and we have unlinked the next node
@@ -470,7 +472,7 @@ static void avl_node_equilibrateLL(
     case AVL_RGT: break;
 	} /* switch */
 	ADDCRC(n);
-	if (r) ADDCRC(r);
+	ADDCRC(r);
 } /* avl_node_equilibrateLL */
 
 static void avl_node_equilibrateRR(
@@ -556,7 +558,7 @@ static void avl_node_equilibrateRR(
     case AVL_LFT: break;
 	} /* switch */
 	ADDCRC(n);
-	if (l) ADDCRC(l);
+	ADDCRC(l);
 } /* avl_node_equilibrateRR */
 
 static void avl_node_equilibrateLR(
@@ -655,8 +657,8 @@ static void avl_node_equilibrateLR(
 	ADDCRC(n);
 	/* These must be generated as the parent
 	 * pointers are modified */
-	if (l->right) ADDCRC(l->right);
-	if (n->left) ADDCRC(n->left);
+	ADDCRC(l->right);
+	ADDCRC(n->left);
 } /* avl_node_equilibrateLR */
 
 static void avl_node_equilibrateRL(
@@ -751,8 +753,8 @@ static void avl_node_equilibrateRL(
 	 */
 	ADDCRC(r);
 	ADDCRC(n);
-	if (n->right) ADDCRC(n->right);
-	if (r->left) ADDCRC(r->left);
+	ADDCRC(n->right);
+	ADDCRC(r->left);
 } /* avl_node_equilibrateRL */
 
 AVL_TREE new_avl_tree(AVL_FCOMP fc, AVL_FCONS fC, AVL_FDEST fD, AVL_FPRNT fP)
@@ -935,7 +937,7 @@ AVL_ITERATOR avl_tree_put(
 		ADDCRC(q);
 	} /* for */
 
-	if (q) ADDCRC(q);
+	ADDCRC(q);
 
 	ADDCRC(t);
 	return res;
