@@ -46,6 +46,7 @@ toclean			+= $(avl_so) $(avl_soname) $(avl_fullname) $(avl_a)
 toclean			+= $(avl_a_objs) $(avl_so_objs)
 
 targets =tstavl tstavl2 tstavl3
+toclean			+= $(targets)
 ut_libs =-lgmock -lgmock_main -lgtest -lpthread
 
 .PHONY: all clean ut
