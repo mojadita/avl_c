@@ -37,10 +37,10 @@ avl_soname		= $(avl_so).$(MAJOR)
 avl_fullname	= $(avl_soname).$(MINOR)
 avl_a			= $(avl_base).a
 avl_a_objs		= avl.o intavl.o stravl.o
-ifeq ($(USE_CRC),1)
-avl_a_objs		+= crc.o crc32ieee8023.o
-CFLAGS			+= -DUSE_CRC=1
-endif
+avl_a_objs-$(USE_CRC) = crc.o crc32ieee8023.o
+CFLAGS-$(USE_CRC) = -DUSE_CRC=1
+avl_a_objs		+= $(avl_a_objs-1)
+CFLAGS			+= $(CFLAGS-1)
 avl_so_objs		=$(avl_a_objs:.o=.pico)
 toclean			+=$(avl_so) $(avl_soname) $(avl_fullname) $(avl_a)
 toclean			+=$(avl_a_objs) $(avl_so_objs)
@@ -75,22 +75,19 @@ deinstall:
 	$(RM) $(ldir)/$(avl_a)
 
 $(avl_so): $(avl_soname)
-	$(LINK) $< $@
+	$(LINK) $> $@
 
 $(avl_soname): $(avl_fullname)
-	$(LINK) $< $@
+	$(LINK) $> $@
 
 $(avl_fullname): $(avl_so_objs)
 	$(LD) $(LDFLAGS) -o $@ -shared -soname=$(avl_soname) $(avl_so_objs)
 
-$(avl_a): $(avl_a)($(avl_a_objs))
-	$(RANLIB) $@
-
-$(avl_a)($(avl_a_objs)): $(avl_a_objs:.o=.c)
+$(avl_a): $(avl_a_objs:.o=.c)
 	$(CC) $(CFLAGS) -c $?
 	$(AR) -r $@ $(?:.c=.o)
-
 	$(RM) $(?:.c=.o)
+	$(RANLIB) $@
 
 common_objs = fprintbuf.o
 toclean 	+= $(common_objs)
