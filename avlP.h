@@ -19,8 +19,8 @@
 #endif
 
 #if USE_CRC
-#include <crc.h>
-#include <crc_alltables.h>
+#include "crc.h"
+#include "crc32ieee8023.h"
 #endif
 
 #ifdef DEB

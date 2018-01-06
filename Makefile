@@ -9,6 +9,7 @@ MAJOR			?=3.2
 MINOR			?=8
 VERSION			?="$(MAJOR).$(MINOR)"
 CFLAGS 			+=-DAVL_VERSION=\"$(VERSION)\"
+USE_CRC			?= 0
 
 prefix			?=	${HOME}
 user			!=	id -u
@@ -30,12 +31,16 @@ umod			?= -o $(usr)
 gmod			?= -g $(grp)
 IFLAGS			?= $(umod) $(gmod)
 
-avl_base		=lib$(PACKAGE)
-avl_so			=$(avl_base).so
-avl_soname		=$(avl_so).$(MAJOR)
-avl_fullname	=$(avl_soname).$(MINOR)
-avl_a			=$(avl_base).a
-avl_a_objs		=avl.o intavl.o stravl.o
+avl_base		= lib$(PACKAGE)
+avl_so			= $(avl_base).so
+avl_soname		= $(avl_so).$(MAJOR)
+avl_fullname	= $(avl_soname).$(MINOR)
+avl_a			= $(avl_base).a
+avl_a_objs		= avl.o intavl.o stravl.o
+ifeq ($(USE_CRC),1)
+avl_a_objs		+= crc.o crc32ieee8023.o
+CFLAGS			+= -DUSE_CRC=1
+endif
 avl_so_objs		=$(avl_a_objs:.o=.pico)
 toclean			+=$(avl_so) $(avl_soname) $(avl_fullname) $(avl_a)
 toclean			+=$(avl_a_objs) $(avl_so_objs)
