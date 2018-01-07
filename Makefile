@@ -24,6 +24,8 @@ RANLIB			?= ranlib
 INSTALL			?= install
 idir			?= $(prefix)/include
 ldir			?= $(prefix)/lib
+mdir			?= $(prefix)/man
+m3dir			?= $(mdir)/man3
 dmod			?= -m 0755 -d
 xmod			?= -m 0711
 fmod			?= -m 0644
@@ -63,9 +65,11 @@ clean:
 install: $(targets)
 	$(INSTALL) $(IFLAGS) $(dmod) $(idir)
 	$(INSTALL) $(IFLAGS) $(dmod) $(ldir)
+	$(INSTALL) $(IFLAGS) $(dmod) $(m3dir)
 	$(INSTALL) $(IFLAGS) $(fmod) $(avl_a) $(ldir)
 	$(INSTALL) $(IFLAGS) $(xmod) $(avl_fullname) $(ldir)
 	$(INSTALL) $(IFLAGS) $(fmod) avl.h $(idir)
+	$(INSTALL) $(IFLAGS) $(fmod) avl.3 $(m3dir)
 	$(LINK) $(avl_soname) $(ldir)/$(avl_so)
 	$(LINK) $(avl_fullname) $(ldir)/$(avl_soname)
 deinstall:

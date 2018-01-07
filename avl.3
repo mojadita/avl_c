@@ -1,0 +1,87 @@
+.TH AVL 3 "jan/2018" "FreeBSD 11.0" "Linux programmer's Manual"
+.Dd $Mdocdate$
+.Dt AVL 3
+.Os
+.Sh LIBRARY
+'Lb libavl
+.Sh SYNOPSIS
+.In avl.h
+
+Link with -lavl
+
+.Ft int
+.Fn "(*AVL_FCOMP)" "const void *k1" "const void *k2"
+.Ft "void *"
+.Fn "(*AVL_FCONS)" "const void *k"
+.Ft void
+.Fn "(*AVL_FDEST)" "const void *k"
+.Ft int
+.Fn "(*AVL_FPRNT)" "const void *k" "FILE *o"
+.Ft typedef struct avl_node *AVL_ITERATOR;
+.Ft typedef struct avl_tree *AVL_TREE;
+.Ft AVL_TREE
+.Fn new_avl_tree "AVL_FCOMP fc" "AVL_FCONS fC" "AVL_FDEST fD" "AVL_FPRNT fP"
+.Ft void
+.Fn free_avl_tree "AVL_TREE t"
+.Ft void
+.Fn avl_tree_clear "AVL_TREE t"
+.Ft AVL_ITERATOR
+.Fn avl_tree_first "AVL_TREE t"
+.Ft AVL_ITERATOR
+.Fn avl_tree_last "AVL_TREE t"
+.Ft AVL_ITERATOR
+.Fn avl_tree_atkey "AVL_TREE t" "const void *key" "AVL_MT ex"
+.Ft AVL_ITERATOR
+.Fn avl_tree_put "AVL_TREE t" "const void *key" "void *dat"
+.Ft int
+.Fn avl_tree_del "AVL_TREE t" "const void *key"
+.Ft int
+.Fn avl_iterator_del "AVL_ITERATOR i" "AVL_TREE t"
+.Ft int
+.Fn avl_tree_empty "AVL_TREE t"
+.Ft int
+.Fn avl_tree_size "AVL_TREE t"
+.Ft int
+.Fn avl_tree_has "AVL_TREE t" "const void *key"
+.Ft "void *"
+.Fn avl_tree_get "AVL_TREE t" "const void *key"
+.Ft void
+.Fn avl_tree_print "AVL_TREE t" "FILE *out"
+.Ft "AVL_ITERATOR"
+.Fn avl_iterator_next "AVL_ITERATOR it"
+.Ft "AVL_ITERATOR"
+.Fn avl_iterator_prev "AVL_ITERATOR it"
+.Ft "const void *"
+.Fn avl_iterator_key "AVL_ITERATOR it"
+.Ft "void *"
+.Fn avl_iterator_data "AVL_ITERATOR it"
+.Ft void
+.Fn avl_iterator_set_data "AVL_ITERATOR it" "const void *d"
+.Ft int
+.Fn avl_tree_chk "AVL_TREE t"
+
+.Sh DESCRIPTION
+The
+.Nm avl
+library allows a programmer to manage ordered maps of (key, value)
+pairs on which some ordering has been imposed.
+
+The ordering of keys is imposed at AVL_TREE creation by passing the AVL_FCOMP
+function pointer that the tree will use in comparing the keys.
+The comparator receives two key pointers and returns a negative number in case
+of being the first key before the second, zero if both are equal and positive
+in case the first key is after the second.
+
+The library makes provision of the posibility of duplicating the keys, and for
+that provision two more pointers are passed to the tree creation routine:
+A copy constructor for a key is passed to make a copy of the key passed, so the
+passed key can be safely discarded after map entry creation; Also a destructor
+is passed to be used to free the key data when it is not more needed.
+These functions mimetize the behaviour of strdup(3), strcmp(3) and free(3) so
+they can be used instead (with proper casting, as the prototypes of strdup(3),
+strcmp(3) and free(3) don't require const pointers)
+
+Finally, there's a key printing routine pointer to be passed to print the key
+values for the avl_tree_print() routine.
+
+

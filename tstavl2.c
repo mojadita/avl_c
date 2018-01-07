@@ -82,7 +82,9 @@ int main (int argc, char **argv)
 		printf("adding %d\n", d);
 #endif
 		intavl_tree_put(t, d, (void *)i);
+#if USE_CRC
 		if (avl_tree_chk(t)) break;
+#endif
 	}
     clock_gettime(CLOCK_REALTIME, &t1);
 
