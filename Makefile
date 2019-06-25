@@ -5,8 +5,8 @@
 # 		All rights reserved.
 
 PACKAGE			?=avl
-MAJOR			?=3.2
-MINOR			?=9
+MAJOR			?=3.3
+MINOR			?=1
 VERSION			?="$(MAJOR).$(MINOR)"
 CFLAGS 			+=-DAVL_VERSION=\"$(VERSION)\"
 USE_CRC			?= 0
@@ -69,6 +69,9 @@ install: $(targets)
 	$(INSTALL) $(IFLAGS) $(fmod) $(avl_a) $(ldir)
 	$(INSTALL) $(IFLAGS) $(xmod) $(avl_fullname) $(ldir)
 	$(INSTALL) $(IFLAGS) $(fmod) avl.h $(idir)
+	$(INSTALL) $(IFLAGS) $(fmod) avlP.h $(idir)
+	$(INSTALL) $(IFLAGS) $(fmod) intavl.h $(idir)
+	$(INSTALL) $(IFLAGS) $(fmod) stravl.h $(idir)
 	$(INSTALL) $(IFLAGS) $(fmod) avl.3 $(m3dir)
 	$(LINK) $(avl_soname) $(ldir)/$(avl_so)
 	$(LINK) $(avl_fullname) $(ldir)/$(avl_soname)

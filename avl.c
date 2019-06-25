@@ -1192,16 +1192,18 @@ static int avl_node_chk(
 	if (n->right) res += avl_node_chk(n->right);
 	return res;
 } /* avl_node_chk */
+#endif
 
 int avl_tree_chk(
 	AVL_TREE t)
 {
 	int res = 0;
+#if USE_CRC
 	if (CRC(t)) res++;
 	if (t->root) res += avl_node_chk(t->root);
+#endif
 	return res;
 } /* avl_tree_chk */
-#endif
 	
 /* $Id: avl.c,v 1.9 2014/08/08 19:10:09 luis Exp $ */
 /* vim: ts=4 sw=4 nu ai
