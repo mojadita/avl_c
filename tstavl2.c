@@ -101,10 +101,14 @@ int main (int argc, char **argv)
 	t1.tv_sec -= t0.tv_sec;
     printf("           n: %d\n", n);
     printf("        seed: %d\n", seed);
-	printf("elapsed time: %ld.%09ld\n", t1.tv_sec, t1.tv_nsec);
+	printf("elapsed time: %llu.%09lu\n",
+		(unsigned long long) t1.tv_sec,
+		(unsigned long) t1.tv_nsec);
     clock_getres(CLOCK_REALTIME, &t0);
-    printf("   clock res: %ld.%09ld\n", t0.tv_sec, t0.tv_nsec);
-    printf("  collisions: %d\n", n - avl_tree_size(t));
+    printf("   clock res: %llu.%09lu\n",
+		(unsigned long long) t0.tv_sec,
+		(unsigned long) t0.tv_nsec);
+    printf("  collisions: %zd\n", n - avl_tree_size(t));
 
 	return 0;
 } /* main */

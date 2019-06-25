@@ -88,8 +88,9 @@ void print_timestamp()
 		end_ts.tv_nsec += 1000000000L;
 		end_ts.tv_sec--;
 	} /* if */
-	printf("CPU time elapsed: %lu.%09lu\n",
-		end_ts.tv_sec, end_ts.tv_nsec);
+	printf("CPU time elapsed: %llu.%09lu\n",
+		(unsigned long long) end_ts.tv_sec,
+		(unsigned long) end_ts.tv_nsec);
 } /* print_timestamp */
 
 /* main program */

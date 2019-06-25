@@ -6,7 +6,7 @@
 
 PACKAGE			?=avl
 MAJOR			?=3.3
-MINOR			?=1
+MINOR			?=2
 VERSION			?="$(MAJOR).$(MINOR)"
 CFLAGS 			+=-DAVL_VERSION=\"$(VERSION)\"
 USE_CRC			?= 0
@@ -62,6 +62,8 @@ ut: $(ut_targets)
 test: $(test_targets)
 clean:
 	$(RM) $(toclean)
+depend: *.c
+	mkdep *.c
 install: $(targets)
 	$(INSTALL) $(IFLAGS) $(dmod) $(idir)
 	$(INSTALL) $(IFLAGS) $(dmod) $(ldir)
