@@ -141,7 +141,7 @@ int avl_tree_empty(
 );
 
 /* This function gives the number of pairs in tree t.  */
-int avl_tree_size(
+size_t avl_tree_size(
 	AVL_TREE t /* the tree descriptor. */
 ); /* Mon Apr  9 11:08:58 CEST 2012 OK*/
 

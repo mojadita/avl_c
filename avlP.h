@@ -64,7 +64,7 @@ struct avl_node {
 };
 
 struct avl_tree {
-	int					sz;
+	size_t				sz;
 	struct avl_node		*root;
 	AVL_FCOMP			fcomp;
 	AVL_FCONS			fcons;

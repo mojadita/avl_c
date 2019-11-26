@@ -980,7 +980,7 @@ int avl_tree_empty(AVL_TREE t)
 	return !t->root;
 } /* avl_tree_empty */
 
-int avl_tree_size(AVL_TREE t)
+size_t avl_tree_size(AVL_TREE t)
 {
 	return t->sz;
 } /* avl_tree_size */

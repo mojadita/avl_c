@@ -193,7 +193,7 @@ int main (int argc, char **argv)
 			continue;
 		case '#':
             set_timestamp();
-			printf("#: %d\n", stravl_tree_size(t));
+			printf("#: %zd\n", stravl_tree_size(t));
             print_timestamp();
 			continue;
 		case '=': p++;

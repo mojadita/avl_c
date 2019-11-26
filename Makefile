@@ -5,8 +5,8 @@
 # 		All rights reserved.
 
 PACKAGE			?=avl
-MAJOR			?=3.3
-MINOR			?=2
+MAJOR			?=3.4
+MINOR			?=1
 VERSION			?="$(MAJOR).$(MINOR)"
 CFLAGS 			+=-DAVL_VERSION=\"$(VERSION)\"
 USE_CRC			?= 0
