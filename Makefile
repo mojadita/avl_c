@@ -6,7 +6,7 @@
 
 PACKAGE			?=avl
 MAJOR			?=3.4
-MINOR			?=1
+MINOR			?=2
 VERSION			?="$(MAJOR).$(MINOR)"
 CFLAGS 			+=-DAVL_VERSION=\"$(VERSION)\"
 USE_CRC			?= 0
@@ -27,6 +27,7 @@ ldir			?= $(prefix)/lib
 mdir			?= $(prefix)/man
 m3dir			?= $(mdir)/man3
 dmod			?= -m 0755 -d
+lmod			?= -m 0755
 xmod			?= -m 0711
 fmod			?= -m 0644
 umod			?= -o $(usr)
@@ -69,7 +70,7 @@ install: $(targets)
 	$(INSTALL) $(IFLAGS) $(dmod) $(ldir)
 	$(INSTALL) $(IFLAGS) $(dmod) $(m3dir)
 	$(INSTALL) $(IFLAGS) $(fmod) $(avl_a) $(ldir)
-	$(INSTALL) $(IFLAGS) $(xmod) $(avl_fullname) $(ldir)
+	$(INSTALL) $(IFLAGS) $(lmod) $(avl_fullname) $(ldir)
 	$(INSTALL) $(IFLAGS) $(fmod) avl.h $(idir)
 	$(INSTALL) $(IFLAGS) $(fmod) avlP.h $(idir)
 	$(INSTALL) $(IFLAGS) $(fmod) intavl.h $(idir)
