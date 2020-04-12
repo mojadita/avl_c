@@ -1,86 +1,358 @@
-.TH AVL 3 "jan/2018" "FreeBSD 11.0" "Linux programmer's Manual"
-'Dd $Mdocdate$
-'Dt AVL 3
-'Os
-.Sh LIBRARY
-'Lb libavl
+.\" avl.3 -- manual page of the library avl.
+.\" Author: Luis Colorado <luiscoloradourcola@gmail.com>
+.\" Date: Sat Apr 11 14:15:39 EEST 2020
+.\" Copyright: (c) 2020 Luis Colorado.  All rights reserved.
+.\" License: BSD
+.
+.Dt AVL 3 "Avl"
+.Dd Jan, 2018
+.Os
+.
+.Sh NAME
+.Nm new_avl_tree ,
+.Nm free_avl_tree ,
+.Nm avl_tree_clear ,
+.Nm avl_tree_first ,
+.Nm avl_tree_last ,
+.Nm avl_tree_atkey ,
+.Nm avl_tree_put ,
+.Nm avl_tree_del ,
+.Nm avl_tree_empty ,
+.Nm avl_tree_size ,
+.Nm avl_tree_has ,
+.Nm avl_tree_get ,
+.Nm avl_tree_print ,
+.Nm avl_iterator_next ,
+.Nm avl_iterator_prev ,
+.Nm avl_iterator_key ,
+.Nm avl_iterator_data ,
+.Nm avl_iterator_set_data ,
+.Nm avl_tree_chk
 .Sh SYNOPSIS
 .In avl.h
-
-Link with -lavl
-.Ft int
-.Fn "(*AVL_FCOMP)" "const void *k1" "const void *k2"
-.Ft "void *"
-.Fn "(*AVL_FCONS)" "const void *k"
-.Ft void
-.Fn "(*AVL_FDEST)" "const void *k"
-.Ft int
-.Fn "(*AVL_FPRNT)" "const void *k" "FILE *o"
-.Ft typedef struct avl_node *AVL_ITERATOR;
-.Ft typedef struct avl_tree *AVL_TREE;
+.
+.Vt typedef struct avl_tree *AVL_TREE;
+.
+.Vt typedef struct avl_node *AVL_ITERATOR;
+.
+.Vt int (*AVL_FCOMP)(const void *key1, const void *key2);
+.Vt void *(*AVL_FCONS)(const void *key);
+.Vt void (*AVL_FDEST)(const void *key);
+.Vt int (*AVL_FPRNT)(const void *k, FILE *o);
+.
 .Ft AVL_TREE
 .Fn new_avl_tree "AVL_FCOMP fc" "AVL_FCONS fC" "AVL_FDEST fD" "AVL_FPRNT fP"
+.
 .Ft void
 .Fn free_avl_tree "AVL_TREE t"
+.
 .Ft void
 .Fn avl_tree_clear "AVL_TREE t"
+.
 .Ft AVL_ITERATOR
 .Fn avl_tree_first "AVL_TREE t"
+.
 .Ft AVL_ITERATOR
 .Fn avl_tree_last "AVL_TREE t"
+.
 .Ft AVL_ITERATOR
 .Fn avl_tree_atkey "AVL_TREE t" "const void *key" "AVL_MT ex"
+.
 .Ft AVL_ITERATOR
 .Fn avl_tree_put "AVL_TREE t" "const void *key" "void *dat"
+.
 .Ft int
 .Fn avl_tree_del "AVL_TREE t" "const void *key"
+.
 .Ft int
 .Fn avl_iterator_del "AVL_ITERATOR i" "AVL_TREE t"
+.
 .Ft int
 .Fn avl_tree_empty "AVL_TREE t"
+.
 .Ft int
 .Fn avl_tree_size "AVL_TREE t"
+.
 .Ft int
 .Fn avl_tree_has "AVL_TREE t" "const void *key"
+.
 .Ft "void *"
 .Fn avl_tree_get "AVL_TREE t" "const void *key"
+.
 .Ft void
 .Fn avl_tree_print "AVL_TREE t" "FILE *out"
+.
 .Ft "AVL_ITERATOR"
 .Fn avl_iterator_next "AVL_ITERATOR it"
+.
 .Ft "AVL_ITERATOR"
 .Fn avl_iterator_prev "AVL_ITERATOR it"
+.
 .Ft "const void *"
 .Fn avl_iterator_key "AVL_ITERATOR it"
+.
 .Ft "void *"
 .Fn avl_iterator_data "AVL_ITERATOR it"
+.
 .Ft void
 .Fn avl_iterator_set_data "AVL_ITERATOR it" "const void *d"
+.
 .Ft int
 .Fn avl_tree_chk "AVL_TREE t"
-
+.
+.Sh LIBRARY
+Compile with
+.Lb "Library of AVL trees"
+using the link option
+.Cm -lavl
+.
 .Sh DESCRIPTION
 The
 .Nm avl
 library allows a programmer to manage ordered maps of (key, value)
 pairs on which some ordering has been imposed.
-
-The ordering of keys is imposed at AVL_TREE creation by passing the AVL_FCOMP
-function pointer that the tree will use in comparing the keys.
-The comparator receives two key pointers and returns a negative number in case
-of being the first key before the second, zero if both are equal and positive
-in case the first key is after the second.
-
-The library makes provision of the posibility of duplicating the keys, and for
-that provision two more pointers are passed to the tree creation routine:
-A copy constructor for a key is passed to make a copy of the key passed, so the
-passed key can be safely discarded after map entry creation; Also a destructor
-is passed to be used to free the key data when it is not more needed.
-These functions mimetize the behaviour of strdup(3), strcmp(3) and free(3) so
-they can be used instead (with proper casting, as the prototypes of strdup(3),
-strcmp(3) and free(3) don't require const pointers)
-
-Finally, there's a key printing routine pointer to be passed to print the key
-values for the avl_tree_print() routine.
-
-
+.Pp
+The ordering of keys is imposed at
+AVL_TREE
+creation by passing the
+AVL_FCOMP
+comparator function callback that the tree will use in
+comparing the keys.
+.Pp
+There are also three callback pointers passed to the
+AVL_TREE
+creation function:  The first two, allow for key allocation
+internally, so the user is not loaded with the responsibility of
+creating key duplicates or releasing them after use.
+Both pointers follow compatible prototypes of
+.Lb libc
+functions
+strdup
+and
+free
+so these functions can be used to duplicate keys and release
+them, once the memory of the pair is released.
+There's no support to allocate/release memory for data values in
+the pairs, as they are supposed to be references to the actual
+data managed by the tree.
+.Pp
+Functions to create a tree, release a tree, add key/data pairs,
+delete them, and to iterate the tree are provided by the library,
+as described below.
+.Pp
+A special function is provided for the case one wants to print
+the tree keys, a function pointer, with prototype compatible to the
+.Lb libc
+function
+fputs
+is given.
+.Pp
+Any of the pointers, in case that functionality is not going to
+be used (except the comparator), can be avoided, by passing
+NULL
+to the tree creation function.
+.Sh TYPES
+.Ss AVL_TREE
+This is the main class of the library.
+AVL_TREE
+instances
+can be accessed and are needed in almost any other library
+function.
+They store all the key/data pairs (with/without allocation) and
+represent the central data type for the library.
+.Ss AVL_ITERATOR
+This type allows you to iterate on the tree data.
+Functions are provided to get an iterator based on a comparation
+with a provided key (less than, less than or equal, equal, greater
+than or equal, or greater than a passed key) are provided, to
+access the first key, the last, the previous key of the key
+pointed to by one iterator, and the next.
+.Ss AVL_FCOMP
+The comparator callback receives two key pointers and returns a
+negative number in case the first key is before the second, 
+zero if both are equal, and positive in case the first key is
+after the second.
+.Ss AVL_FCONS
+The constructor function operates like a copy constructor
+function.
+It's up to the programmer to decide how this function is to be
+implemented.
+In normal use, the node creation functions of the
+AVL_TREE
+call it (if it is not
+NULL)
+when the tree node is being build to make a copy (from dynamically
+allocated memory) of the original data.
+No check is made to verify that both copies are equal, so this
+allows keys of dynamically variable amounts of memory to be used.
+The only requirements are that the copy must compare exactly in
+the same way that the original key data does, and that the
+freeing function is responsible of freeing all the memory
+allocated with this function, in order to never have a memory
+leak.
+.Ss AVL_FDEST
+The function of this callback is to return the memory used by the
+key, once it is not needed again.
+The library calls this function when the data pair is no longer
+needed.
+.Ss AVL_PRINT
+This function allows to print the key values of a tree in tree
+form.
+The function is called on each node as it is being printed to
+provide printing service for the key itself.
+As the printing function is passed a
+FILE *
+descriptor to print the tree data in some output stream, the
+callback takes a key pointer as its first parameter, and a file
+descriptor as the second.
+The calls to this function repeat for each node in the tree.
+The function must limit itself to print the key, and no newlines
+of separator between the key and the rest of the printed tree.
+This function is provided for debuggin purposes and the printing
+format has a fixed structure that cannot be changed.
+.Pp
+All callbacks (except the comparator) are optional, pass
+NULL
+in case you don't want to use the functionalities they support.
+.Sh DESCRIPTION
+.Ss new_avl_tree
+The function new_avl_tree
+returns an empty tree, created from dynamically allocated memory.
+It is passed the four callback pointers described above, and
+returns a ready to use, empty instance of a tree map.
+in case some problem occurs, it returns
+NULL.
+.Ss free_avl_tree
+This function frees all the resources allocated to a tree.
+No more operations are allowed after this function is called
+on a tree.
+.Ss avl_tree_clear
+This function deletes all nodes in a tree, freeing all the
+dynamic resources allocated to it.
+The tree becomes an empty tree, it can continue being used.
+.Ss avl_tree_first
+This function is called for a tree and returns an
+AVL_ITERATOR
+pointing to the first element of the tree.
+The function returns
+NULL
+if the tree has no eleemnts.
+.Ss avl_tree_last
+This function returns an iterator pointing to the last element of
+the tree.
+It returns
+NULL
+if the tree has no elements.
+.Ss avl_tree_atkey
+This function takes a tree and a key, and returns an iterator
+pointing to the node of the tree that matches the key, based on
+the third parameter, which is an enumerated value with the
+following values:
+.Bl -tag
+.It MT_L
+meaning that the closest key node being less than the passed key
+is desired.
+.It MT_LE
+meaning that the closest key node being less or equal than the
+passed key is desired.
+.It MT_EQ
+this value means that an iterator pointing to the exact value
+passed is required to be returned.
+.It MT_GE
+indicates that an iterator pointing to the closest value greater
+than or equal to the passed key is desired.
+.It MT_G
+indicates that an iterator pointing to the closest value greater
+than the passed wan is requested.
+.Be
+The function returns an iterator pointing to the requested value,
+or
+NULL
+in case no node exists with a value like the requested one.
+.Ss avl_tree_put
+Adds the passed key and data parameters to the tree passed as
+first argument.
+The function returns an iterator to the added element.
+In case the element cannot be returned (because there's one
+element already in the tree with that key) the iterator returned
+is a 
+NULL
+value.
+.Ss avl_tree_del
+This function deletes the tree node with key passed as parameter.
+The function returns true in case the element was deleted, and
+false otherwise.
+.Sh avl_iterator_del
+This function deletes the element referenced by some iterator.
+The iterator is invalidated after this.
+The function requires to be passed the iterator to be operated
+on, and the tree it points to (the reason for this is that, due
+to implementation issues, an iterator doesn't know about the tree
+it points to).
+Trying to pass a tree to which the iterator is not pointing to is
+an error and will produce undefined behaviour.
+.Ss avl_tree_empty
+This function returns true in case the tree is empty (has no
+data) or false in case the tree has elements on it.
+.Ss avl_tree_size
+This function returns the number of elements in the tree.
+.Ss avl_tree_has
+This function returns true if the passed key is stored in the
+tree specified.
+.Ss avl_tree_get
+This function returns the reference stored in position of the key
+passed as argument.
+It returns the data reference part.
+.Pp
+Note that there's no way to detect if a key is present in the
+tree with this function if storing 
+NULL
+references into the tree is allowed.
+The function returns
+NULL if the key/data pair is not present in the tree.
+.Ss avl_tree_print
+This function prints a tree description (made with line drawing
+characters to show the tree node dependencies) of the passed
+tree.
+For this function to work it is not necessary to have a valid
+AVL_PRINT
+callback installed, but if you don't have it, only the tree node
+info will be printed, without any reference to the node keys.
+.Ss avl_iterator_next
+Obtains an iterator that points to the next node (in the
+comparator's sense order) in the tree.
+The function returns
+NULL
+in case no more tree nodes are after the one passed to.
+.Ss avl_iterator_prev
+Returns an iterator pointing to the previous node of the one
+pointed to by the passed iterator reference.
+NULL
+is returned in case there's no such node in the tree.
+.Ss avl_iterator_key
+Returns a reference to the key stored in the node.
+Be carefull not to modify the pointed data of this returned
+reference, as you can corrupt the tree's internal data and/or
+structure.
+.Ss avl_iterator_data
+This function returns the data reference of the pair pointed to
+by the passed iterator.
+.Ss avl_iterator_set_data
+This function allows you to change the data value of the pair
+associated to the iterator passed to the function.
+.Ss avl_tree_chk
+If you compile the avl library with suppor for checksumming the
+nodes, then a CRC is appended to each node (and to the tree
+structure) that can be verified with this routine.
+The routine iterates all nodes of the tree verifying that the
+stored CRCs match the data contents of each node, and returns the
+number of failing nodes of the tree.
+Failing this check means that the tree structure has been
+somehow destructed by other parts of the program and cannot be
+used.
+.Sh AUTHOR
+Luis Colorado
+.Am luiscoloradourcola@gmail.com .
+.Sh GITHUB
+This code can be found at the following url:
+https://github.com/mojadita/avl_c
