@@ -282,7 +282,7 @@ value.
 This function deletes the tree node with key passed as parameter.
 The function returns true in case the element was deleted, and
 false otherwise.
-.Sh avl_iterator_del
+.Ss avl_iterator_del
 This function deletes the element referenced by some iterator.
 The iterator is invalidated after this.
 The function requires to be passed the iterator to be operated
@@ -350,6 +350,17 @@ number of failing nodes of the tree.
 Failing this check means that the tree structure has been
 somehow destructed by other parts of the program and cannot be
 used.
+.Sh RETURN VALUES
+The functions that return an
+.Cm int
+value, just return 0 on success and != 0 on failure.
+The functions that return an
+.Cm AVL_TREE
+or
+.Cm AVL_ITERATOR
+return a reference to the tree or iterator, or
+.Cm NULL
+in case of error.
 .Sh AUTHOR
 Luis Colorado
 .Am luiscoloradourcola@gmail.com .
