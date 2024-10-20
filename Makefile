@@ -11,7 +11,7 @@ VERSION			?="$(MAJOR).$(MINOR)"
 CFLAGS 			+=-DAVL_VERSION=\"$(VERSION)\"
 USE_CRC			?= 0
 
-prefix			?=	${HOME}
+prefix			?=	/usr/local
 user			!=	id -u
 group			!=	id -g
 
@@ -78,7 +78,7 @@ install: $(targets)
 	$(INSTALL) $(IFLAGS) $(fmod) avl.3 $(m3dir)
 	$(LINK) $(avl_soname) $(ldir)/$(avl_so)
 	$(LINK) $(avl_fullname) $(ldir)/$(avl_soname)
-deinstall:
+deinstall uninstall:
 	$(RM) $(idir)/avl.h
 	$(RM) $(ldir)/$(avl_fullname)
 	$(RM) $(ldir)/$(avl_soname)
