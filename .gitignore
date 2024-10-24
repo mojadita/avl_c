@@ -2,7 +2,7 @@
 *.pico
 *.so
 *.so.*
-libavl.so
+libavl_c.so
 CVS/
 tstavl
 tstavl_so
@@ -10,5 +10,5 @@ tstavl2
 tstavl2_so
 tstavl3
 ut_avl
-libavl.a
+libavl_c.a
 .depend

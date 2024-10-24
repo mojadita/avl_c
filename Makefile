@@ -4,7 +4,7 @@
 # Disclaimer: (C) 2013 LUIS COLORADO SISTEMAS S.L.U.
 # 		All rights reserved.
 
-PACKAGE			?=avl
+PACKAGE			?=avl_c
 MAJOR			?=3.4
 MINOR			?=2
 VERSION			?="$(MAJOR).$(MINOR)"
@@ -12,11 +12,9 @@ CFLAGS 			+=-DAVL_VERSION=\"$(VERSION)\"
 USE_CRC			?= 0
 
 prefix			?=	/usr/local
-user			!=	id -u
-group			!=	id -g
 
-usr				?= $(user)
-grp				?= $(group)
+usr				?= bin
+grp				?= bin
 
 RM				?= -rm -f
 LINK			?= ln -sf
