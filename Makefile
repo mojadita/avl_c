@@ -2,52 +2,52 @@
 # Author: Luis Colorado <lc@luiscoloradosistemas.com>
 # Date: jue nov 21 23:48:42 CET 2013
 # Disclaimer: (C) 2013 LUIS COLORADO SISTEMAS S.L.U.
-# 		All rights reserved.
+#       All rights reserved.
 
-PACKAGE			?=avl_c
-MAJOR			?=3.4
-MINOR			?=2
-VERSION			?="$(MAJOR).$(MINOR)"
-CFLAGS 			+=-DAVL_VERSION=\"$(VERSION)\"
-USE_CRC			?= 0
+PACKAGE         ?=avl_c
+MAJOR           ?=3.4
+MINOR           ?=2
+VERSION         ?="$(MAJOR).$(MINOR)"
+CFLAGS          +=-DAVL_VERSION=\"$(VERSION)\"
+USE_CRC         ?= 0
 
-prefix			?=	/usr/local
+prefix          ?=  /usr/local
 
-usr				?= bin
-grp				?= bin
+usr             ?= bin
+grp             ?= bin
 
-RM				?= -rm -f
-LINK			?= ln -sf
-RANLIB			?= ranlib
-INSTALL			?= install
-idir			?= $(prefix)/include
-ldir			?= $(prefix)/lib
-mdir			?= $(prefix)/man
-m3dir			?= $(mdir)/man3
-dmod			?= -m 0755 -d
-lmod			?= -m 0755
-xmod			?= -m 0711
-fmod			?= -m 0644
-umod			?= -o $(usr)
-gmod			?= -g $(grp)
-IFLAGS			?= $(umod) $(gmod)
+RM              ?= -rm -f
+LINK            ?= ln -sf
+RANLIB          ?= ranlib
+INSTALL         ?= install
+idir            ?= $(prefix)/include
+ldir            ?= $(prefix)/lib
+mdir            ?= $(prefix)/man
+m3dir           ?= $(mdir)/man3
+dmod            ?= -m 0755 -d
+lmod            ?= -m 0755
+xmod            ?= -m 0711
+fmod            ?= -m 0644
+umod            ?= -o $(usr)
+gmod            ?= -g $(grp)
+IFLAGS          ?= $(umod) $(gmod)
 
-avl_base		= lib$(PACKAGE)
-avl_so			= $(avl_base).so
-avl_soname		= $(avl_so).$(MAJOR)
-avl_fullname	= $(avl_soname).$(MINOR)
-avl_a			= $(avl_base).a
-avl_a_objs		= avl.o intavl.o stravl.o
+avl_base        = lib$(PACKAGE)
+avl_so          = $(avl_base).so
+avl_soname      = $(avl_so).$(MAJOR)
+avl_fullname    = $(avl_soname).$(MINOR)
+avl_a           = $(avl_base).a
+avl_a_objs      = avl.o intavl.o stravl.o
 avl_a_objs-$(USE_CRC) = crc.o crc32ieee8023.o
 CFLAGS-$(USE_CRC) = -DUSE_CRC=1
-avl_a_objs		+= $(avl_a_objs-1)
-CFLAGS			+= $(CFLAGS-1)
-avl_so_objs		=  $(avl_a_objs:.o=.pico)
-toclean			+= $(avl_so) $(avl_soname) $(avl_fullname) $(avl_a)
-toclean			+= $(avl_a_objs) $(avl_so_objs)
+avl_a_objs      += $(avl_a_objs-1)
+CFLAGS          += $(CFLAGS-1)
+avl_so_objs      = $(avl_a_objs:.o=.pico)
+toclean         += $(avl_so) $(avl_soname) $(avl_fullname) $(avl_a)
+toclean         += $(avl_a_objs) $(avl_so_objs)
 
 targets =tstavl tstavl2 tstavl3
-toclean			+= $(targets)
+toclean         += $(targets)
 ut_libs =-lgmock -lgmock_main -lgtest -lpthread
 
 .PHONY: all clean ut
