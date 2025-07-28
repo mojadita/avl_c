@@ -19,10 +19,12 @@ grp             ?= bin
 RM              ?= -rm -f
 LINK            ?= ln -sf
 RANLIB          ?= ranlib
+GZIP            ?= gzip -v
 INSTALL         ?= install
+
 idir            ?= $(prefix)/include
 ldir            ?= $(prefix)/lib
-mdir            ?= $(prefix)/man
+mdir            ?= $(prefix)/share/man
 m3dir           ?= $(mdir)/man3
 dmod            ?= -m 0755 -d
 lmod            ?= -m 0755
@@ -51,10 +53,13 @@ toclean         += $(targets)
 ut_libs =-lgmock -lgmock_main -lgtest -lpthread
 
 .PHONY: all clean ut
-.SUFFIXES: .pico
+.SUFFIXES: .pico .3.gz .3
 
 .c.pico:
 	$(CC) $(CFLAGS) -fPIC -c -o $@ $<
+
+.3.3.gz:
+	$(GZIP) < $< > $@
 
 all: $(targets)
 ut: $(ut_targets)
@@ -63,31 +68,36 @@ clean:
 	$(RM) $(toclean)
 depend: *.c
 	mkdep *.c
-install: $(targets)
-	$(INSTALL) $(IFLAGS) $(dmod) $(idir)
-	$(INSTALL) $(IFLAGS) $(dmod) $(ldir)
-	$(INSTALL) $(IFLAGS) $(dmod) $(m3dir)
-	$(INSTALL) $(IFLAGS) $(fmod) $(avl_a) $(ldir)
-	$(INSTALL) $(IFLAGS) $(lmod) $(avl_fullname) $(ldir)
-	$(INSTALL) $(IFLAGS) $(fmod) avl.h $(idir)
-	$(INSTALL) $(IFLAGS) $(fmod) avlP.h $(idir)
-	$(INSTALL) $(IFLAGS) $(fmod) intavl.h $(idir)
-	$(INSTALL) $(IFLAGS) $(fmod) stravl.h $(idir)
-	$(INSTALL) $(IFLAGS) $(fmod) avl.3 $(m3dir)
-	$(LINK) $(avl_soname) $(ldir)/$(avl_so)
-	$(LINK) $(avl_fullname) $(ldir)/$(avl_soname)
-deinstall uninstall:
-	$(RM) $(idir)/avl.h
-	$(RM) $(ldir)/$(avl_fullname)
-	$(RM) $(ldir)/$(avl_soname)
-	$(RM) $(ldir)/$(avl_so)
-	$(RM) $(ldir)/$(avl_a)
 
-$(avl_so): $(avl_soname)
+toinstall = $(idir)/avl.h $(idir)/avlP.h $(idir)/intavl.h $(idir)/stravl.h \
+			$(m3dir)/avl.3.gz $(ldir)/$(avl_a) $(ldir)/$(avl_fullname) \
+			$(ldir)/$(avl_so) $(ldir)/$(avl_soname)
+
+install: $(toinstall)
+
+$(idir) $(ldir) $(m3dir):
+	$(INSTALL) $(IFLAGS) $(dmod) $@
+
+$(idir)/avl.h $(idir)/avlP.h $(idir)/intavl.h $(idir)/stravl.h: $(@:T) $(idir)
+	$(INSTALL) $(IFLAGS) $(fmod) $(@:T) $(idir)
+
+$(m3dir)/avl.3.gz: avl.3.gz $(m3dir)
+	$(INSTALL) $(IFLAGS) $(fmod) $(@:T) $(m3dir)
+
+$(ldir)/$(avl_fullname): $(avl_fullname) $(ldir)
+	$(INSTALL) $(IFLAGS) $(lmod) $(avl_fullname) $(ldir)
+
+$(ldir)/$(avl_a): $(avl_a) $(ldir)
+	$(INSTALL) $(IFLAGS) $(fmod) $(avl_a) $(ldir)
+
+$(ldir)/$(avl_so): $(ldir)
 	$(LINK) $(avl_soname) $@
 
-$(avl_soname): $(avl_fullname)
+$(ldir)/$(avl_soname): $(ldir)
 	$(LINK) $(avl_fullname) $@
+
+deinstall uninstall:
+	$(RM) $(toinstall)
 
 $(avl_fullname): $(avl_so_objs)
 	$(LD) $(LDFLAGS) -o $@ -shared -soname=$(avl_soname) $(avl_so_objs)
