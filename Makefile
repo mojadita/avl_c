@@ -81,7 +81,7 @@ depend: *.c
 
 toinstall = $(includedir)/avl.h $(includedir)/avlP.h \
         $(includedir)/intavl.h $(includedir)/stravl.h \
-        $(man3dir)/avl.3.gz $(libdir)/$(avl_a) \
+        $(man3dir)/avl_c.3.gz $(libdir)/$(avl_a) \
 		$(libdir)/$(avl_fullname) $(libdir)/$(avl_so) \
 		$(libdir)/$(avl_soname)
 
@@ -102,7 +102,7 @@ $(includedir)/intavl.h: intavl.h
 $(includedir)/stravl.h: stravl.h
 	$(INSTALL) $(IFLAGS) $(fmod) $? $@
 
-$(man3dir)/avl.3.gz: avl.3.gz
+$(man3dir)/avl_c.3.gz: avl_c.3.gz
 	$(INSTALL) $(IFLAGS) $(fmod) $? $@
 
 $(libdir)/$(avl_fullname): $(avl_fullname)
