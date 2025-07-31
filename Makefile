@@ -4,17 +4,31 @@
 # Disclaimer: (C) 2013 LUIS COLORADO SISTEMAS S.L.U.
 #       All rights reserved.
 
-PACKAGE         ?=avl_c
-MAJOR           ?=3.4
-MINOR           ?=2
-VERSION         ?="$(MAJOR).$(MINOR)"
-CFLAGS          +=-DAVL_VERSION=\"$(VERSION)\"
+PACKAGE         ?= avl_c
+MAJOR           ?= 3.4
+MINOR           ?= 2
+VERSION         ?= "$(MAJOR).$(MINOR)"
+CFLAGS          += -DAVL_VERSION=\"$(VERSION)\"
 USE_CRC         ?= 0
 
-prefix          ?=  /usr/local
+OS              != uname -o
 
-usr             ?= bin
-grp             ?= bin
+prefix          ?= /usr/local
+execprefix      ?= $(prefix)
+bindir          ?= $(prefix)/bin
+libdir          ?= $(prefix)/lib
+includedir      ?= $(prefix)/include
+datarootdir     ?= $(prefix)/share
+mandir          ?= $(datarootdir)/man
+man3dir         ?= $(mandir)/man3
+
+usr-FreeBSD     ?= root
+grp-FreeBSD     ?= wheel
+usr-GNU/Linux   ?= bin
+grp-GNU/Linux   ?= bin
+
+usr             ?= $(usr-$(OS))
+grp             ?= $(grp-$(OS))
 
 RM              ?= -rm -f
 LINK            ?= ln -sf
@@ -22,10 +36,6 @@ RANLIB          ?= ranlib
 GZIP            ?= gzip -v
 INSTALL         ?= install
 
-idir            ?= $(prefix)/include
-ldir            ?= $(prefix)/lib
-mdir            ?= $(prefix)/share/man
-m3dir           ?= $(mdir)/man3
 dmod            ?= -m 0755 -d
 lmod            ?= -m 0755
 xmod            ?= -m 0711
@@ -69,31 +79,42 @@ clean:
 depend: *.c
 	mkdep *.c
 
-toinstall = $(idir)/avl.h $(idir)/avlP.h $(idir)/intavl.h $(idir)/stravl.h \
-			$(m3dir)/avl.3.gz $(ldir)/$(avl_a) $(ldir)/$(avl_fullname) \
-			$(ldir)/$(avl_so) $(ldir)/$(avl_soname)
+toinstall = $(includedir)/avl.h $(includedir)/avlP.h \
+        $(includedir)/intavl.h $(includedir)/stravl.h \
+        $(man3dir)/avl.3.gz $(libdir)/$(avl_a) \
+		$(libdir)/$(avl_fullname) $(libdir)/$(avl_so) \
+		$(libdir)/$(avl_soname)
 
 install: $(toinstall)
 
-$(idir) $(ldir) $(m3dir):
+$(includedir) $(libdir) $(man3dir):
 	$(INSTALL) $(IFLAGS) $(dmod) $@
 
-$(idir)/avl.h $(idir)/avlP.h $(idir)/intavl.h $(idir)/stravl.h: $(@:T) $(idir)
-	$(INSTALL) $(IFLAGS) $(fmod) $(@:T) $(idir)
+$(includedir)/avl.h: avl.h
+	$(INSTALL) $(IFLAGS) $(fmod) $? $@
 
-$(m3dir)/avl.3.gz: avl.3.gz $(m3dir)
-	$(INSTALL) $(IFLAGS) $(fmod) $(@:T) $(m3dir)
+$(includedir)/avlP.h: avlP.h
+	$(INSTALL) $(IFLAGS) $(fmod) $? $@
 
-$(ldir)/$(avl_fullname): $(avl_fullname) $(ldir)
-	$(INSTALL) $(IFLAGS) $(lmod) $(avl_fullname) $(ldir)
+$(includedir)/intavl.h: intavl.h
+	$(INSTALL) $(IFLAGS) $(fmod) $? $@
 
-$(ldir)/$(avl_a): $(avl_a) $(ldir)
-	$(INSTALL) $(IFLAGS) $(fmod) $(avl_a) $(ldir)
+$(includedir)/stravl.h: stravl.h
+	$(INSTALL) $(IFLAGS) $(fmod) $? $@
 
-$(ldir)/$(avl_so): $(ldir)
+$(man3dir)/avl.3.gz: avl.3.gz
+	$(INSTALL) $(IFLAGS) $(fmod) $? $@
+
+$(libdir)/$(avl_fullname): $(avl_fullname)
+	$(INSTALL) $(IFLAGS) $(lmod) $? $@
+
+$(libdir)/$(avl_a): $(avl_a)
+	$(INSTALL) $(IFLAGS) $(fmod) $(avl_a) $@
+
+$(libdir)/$(avl_so):
 	$(LINK) $(avl_soname) $@
 
-$(ldir)/$(avl_soname): $(ldir)
+$(libdir)/$(avl_soname):
 	$(LINK) $(avl_fullname) $@
 
 deinstall uninstall:
@@ -108,14 +129,14 @@ $(avl_a): $(avl_a_objs:.o=.c)
 	$(RM) $(?:.c=.o)
 	$(RANLIB) $@
 
-common_objs = fprintbuf.o
-toclean 	+= $(common_objs)
+common_objs     = fprintbuf.o
+toclean 	   += $(common_objs)
 
-tstavl_objs = tstavl.o
-toclean		+= $(tstavl_objs)
-tstavl_deps = $(avl_so) $(avl_a)
-tstavl_ldflags = -L.
-tstavl_libs = -l$(PACKAGE)
+tstavl_objs     = tstavl.o
+toclean		   += $(tstavl_objs)
+tstavl_deps     = $(avl_a)
+tstavl_ldflags  = -L$(libdir) -L.
+tstavl_libs     = -l$(PACKAGE)
 
 tstavl: $(tstavl_objs) $(common_objs) $(tstavl_deps)
 	$(CC) $(LDFLAGS) -o $@ $($@_objs) $(common_objs) $(tstavl_ldflags) $(tstavl_libs)
